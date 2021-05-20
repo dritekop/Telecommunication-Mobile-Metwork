@@ -1,0 +1,2 @@
+#ignore the directory producted by meson
+/Wrapper/bin
