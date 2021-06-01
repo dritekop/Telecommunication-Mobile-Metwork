@@ -24,7 +24,9 @@ void registration() {
     std::cin >> user_name;
     std::cout << "Type number: ";
     std::cin >> number;
+
     std::regex num_regex("[+][3][8][0]([0-9]{9})");
+
     while (!std::regex_match(number,num_regex)) {
         std::cout << "Type standart number format +380XXXXXXXXX\n";
         std::cin >> number;
@@ -34,8 +36,16 @@ void registration() {
 
 void calling() {
     std::string incoming_number;
+
     std::cout << "Type number to call: ";
     std::cin >> incoming_number;
+
+    std::regex num_regex("[+][3][8][0]([0-9]{9})");
+
+    while (!std::regex_match(number,num_regex)) {
+        std::cout << "Type standart number format +380XXXXXXXXX\n";
+        std::cin >> number;
+    }
 }
 
 void action_detect(std::string& act) {
