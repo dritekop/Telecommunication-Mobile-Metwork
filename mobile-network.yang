@@ -1,0 +1,51 @@
+module mobile-network {
+    namespace "urn:oid:2.16.804";
+
+    prefix mobnet;
+
+    typedef mobileNumber {
+        type string {
+            pattern "[+][3][8][0]([0-9]{9})";
+        }
+        description
+           "Standart format for Ukranian mobile number.
+		namespace is urn for Ukraine";
+    }
+
+    container users {
+        list subscriber {
+            key "number";
+
+            config true;
+
+            description "Info about subscriber";
+
+            leaf number {
+                type mobileNumber;
+            }
+        
+            leaf userName {
+                type string;
+            }
+
+            leaf incomingNumber {
+                type mobileNumber;
+            }
+
+            leaf state {
+                type enumeration {
+                    enum busy {
+                        value 1;
+                        description
+                              "Subscriber is busy";
+                    }
+                    enum hangUp {
+                        value 2;
+                        description
+                          "Subsriber can't accept";
+                    }
+                }
+            }
+        }
+    }
+}
