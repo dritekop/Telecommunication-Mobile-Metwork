@@ -1,3 +1,7 @@
 #ignore the directory producted by meson
 /Wrapper/bin
+<<<<<<< HEAD
 /bin
+=======
+/bin/
+>>>>>>> 7b32a2f710f4d3523aeaf7a4f1deec4e3668a048
