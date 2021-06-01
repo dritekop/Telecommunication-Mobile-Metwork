@@ -42,9 +42,9 @@ void calling() {
 
     std::regex num_regex("[+][3][8][0]([0-9]{9})");
 
-    while (!std::regex_match(number,num_regex)) {
+    while (!std::regex_match(incoming_number,num_regex)) {
         std::cout << "Type standart number format +380XXXXXXXXX\n";
-        std::cin >> number;
+        std::cin >> incoming_number;
     }
 }
 
