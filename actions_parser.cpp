@@ -3,6 +3,10 @@
 #include <cstdlib>
 #include <regex>
 
+#define WITHOUT_REGISTER_WORD_LENGTH 9
+#define WITHOUT_CALL_WORD_LENGTH 5
+#define WITHOUT_NAME_WORD_LENGTH 5
+
 void action_detect(std::string&);
 void registration(std::string&);
 void calling(std::string&);
@@ -18,19 +22,19 @@ int main(int argc, char** argv)
 }
 
 void registration(std::string& act) {
-    std::string number = act.substr(9);
+    std::string number = act.substr(WITHOUT_REGISTER_WORD_LENGTH);
     std::cout << number << std::endl;
     std::cout << "Here I should initialize the subscriber instance in the userlist.\n";
 }
 
 void calling(std::string& act) {
-    std::string incoming_number = act.substr(5);
+    std::string incoming_number = act.substr(WITHOUT_CALL_WORD_LENGTH);
     std::cout << incoming_number << std::endl;
     std::cout << "Here I should initialize the changes of other subcriber.\n";
 }
 
 void change_name(std::string& act) {
-    std::string name = act.substr(5);
+    std::string name = act.substr(WITHOUT_NAME_WORD_LENGTH);
     std::cout << name << std::endl;
     std::cout << "Here I should set the name of the user.\n";
 }
