@@ -3,14 +3,10 @@
 #include <cstdlib>
 #include <regex>
 
-#define WITHOUT_REGISTER_WORD_LENGTH 9
-#define WITHOUT_CALL_WORD_LENGTH 5
-#define WITHOUT_NAME_WORD_LENGTH 5
+#define BEGIN 0
+#define WHITESPACE_MOVE 1
 
 void action_detect(std::string&);
-void registration(std::string&);
-void calling(std::string&);
-void change_name(std::string&);
 
 int main(int argc, char** argv)
 {
@@ -21,59 +17,91 @@ int main(int argc, char** argv)
     }
 }
 
-void registration(std::string& act) {
-    std::string number = act.substr(WITHOUT_REGISTER_WORD_LENGTH);
-    std::cout << number << std::endl;
-    std::cout << "Here I should initialize the subscriber instance in the userlist.\n";
+void f_register(std::string& number) {
+    std::regex num_regex("[+][3][8][0]([0-9]{9})");
+    if (std::regex_match(number,num_regex)) {
+        std::cout << number << std::endl;
+        std::cout << "Here I should initialize the subscriber instance in the userlist.\n";
+    } else {
+        std::cout << "Number should have format +380XXXXXXXXX\n";
+    }
 }
 
-void calling(std::string& act) {
-    std::string incoming_number = act.substr(WITHOUT_CALL_WORD_LENGTH);
-    std::cout << incoming_number << std::endl;
-    std::cout << "Here I should initialize the changes of other subcriber.\n";
+void f_unregister() {
+    std::cout << "Here I should delete the subscriber instance from the userlist.\n";
 }
 
-void change_name(std::string& act) {
-    std::string name = act.substr(WITHOUT_NAME_WORD_LENGTH);
-    std::cout << name << std::endl;
-    std::cout << "Here I should set the name of the user.\n";
+void f_call(std::string& number) {
+    std::regex num_regex("[+][3][8][0]([0-9]{9})");
+    if (std::regex_match(number, num_regex)) {
+        std::cout << number << std::endl;
+        std::cout << "Here I should initialize the changes of other subcriber.\n";
+    } else {
+        std::cout << "Number should have format +380XXXXXXXXX\n";
+    }
 }
 
-void action_detect(std::string& act) {
-    std::regex register_regex("[r][e][g][i][s][t][e][r][ ][+][3][8][0]([0-9]{9})",\
-        std::regex::icase);
-    std::regex call_regex("[c][a][l][l][ ][+][3][8][0]([0-9]{9})",\
-        std::regex::icase);
-    std::regex name_regex("[n][a][m][e][ ][a-zA-Z]([ a-zA-Z0-9]+)",\
-        std::regex::icase);
-    std::regex unregister_regex("[u][n][r][e][g][i][s][t][e][r]",\
-        std::regex::icase);
-    std::regex answer_regex("[a][n][s][w][e][r]",\
-        std::regex::icase);
-    std::regex reject_regex("[r][e][j][e][c][t]",\
-        std::regex::icase);
-    std::regex call_end_regex("[c][a][l][l][e][n][d]",\
-        std::regex::icase);
-    std::regex exit_regex("[e][x][i][t]",\
-        std::regex::icase);
+void f_name(std::string& name) {
+    std::regex name_regex("[a-zA-Z]([ a-zA-Z0-9]+)");
+    if (std::regex_match(name,name_regex)) {
+        std::cout << name << std::endl;
+        std::cout << "Here I should change leaf name.\n";
+    } else {
+        std::cout << "Error. Change the name.\n";
+    }
+}
 
-    if (std::regex_match(act, register_regex))
-        registration(act);
-    else if (std::regex_match(act, unregister_regex))
-        std::cout << "Here I should delete the subscriber instance from the userlist.\n";
-    else if (std::regex_match(act, call_regex))
-        calling(act);
-    else if (std::regex_match(act, name_regex))
-        change_name(act);
-    else if (std::regex_match(act, answer_regex))
-        std::cout << "changes state to busy\n";
-    else if (std::regex_match(act, reject_regex))
-        std::cout << "caller is no more busy\n";
-    else if (std::regex_match(act, call_end_regex))
-        std::cout << "caller and this number are no more busy\n";
-    else if (std::regex_match(act, exit_regex))
+void f_answer() {
+    std::cout << "changing the state from active to busy\n";
+}
+
+void f_reject() {
+    std::cout << "caller and this number are no more active\n";
+}
+
+void f_call_end() {
+    std::cout << "caller and this number are no more busy\n";
+}
+
+void action_detect(std::string& taken_line) {
+    std::string command = taken_line;
+    std::string arg;
+
+    std::size_t found = command.find(" ");
+
+    if (found != std::string::npos) {
+        found += WHITESPACE_MOVE;
+        arg = command.substr(found);
+        found -= WHITESPACE_MOVE;
+        command = command.substr(BEGIN, found);
+    }
+
+    if (!command.compare("register")) {
+        f_register(arg);
+    }
+    else if (!command.compare("unregister")) {
+        f_unregister();
+    }
+    else if (!command.compare("call")) {
+        f_call(arg);
+    }
+    else if (!command.compare("name")) {
+        f_name(arg);
+    }
+    else if (!command.compare("answer")) {
+        f_answer();
+    }
+    else if (!command.compare("reject")) {
+        f_reject();
+    }
+    else if (!command.compare("callEnd")) {
+        f_call_end();
+    }
+    else if (!command.compare("exit")) {
         std::exit(EXIT_SUCCESS);
-    else
+    }
+    else {
         std::cout << "Invalid operation\n";
+    }
 }
 
