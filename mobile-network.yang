@@ -8,8 +8,7 @@ module mobile-network {
             pattern "[+][3][8][0]([0-9]{9})";
         }
         description
-          "Standart format for the Ukranian mobile number. " +
-                "namespace is urn for Ukraine";
+          "Standart format for the Ukranian mobile number. ";
     }
 
     grouping user {
