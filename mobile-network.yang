@@ -36,6 +36,9 @@ module mobile-network {
 
             leaf state {
                 config true;
+
+		mandatory true;
+
                 type enumeration {
                     enum idle {
                         value 1;
