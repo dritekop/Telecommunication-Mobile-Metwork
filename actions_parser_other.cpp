@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <string_view>
 #include <vector>
 #include <map>
 #include <functional>
@@ -78,7 +77,7 @@ void f_unregister(const std::vector<std::string>& line_tokens) {
 
 void f_call(const std::vector<std::string>& line_tokens) {
     if (line_tokens.size() != TWO_ARGS) {
-        std::cout << "Wrong number of the arguments\n";
+        std::cout << "Wrong amount of the arguments\n";
         return;
     }
 
@@ -95,7 +94,7 @@ void f_call(const std::vector<std::string>& line_tokens) {
 
 void f_name(std::vector<std::string>& line_tokens) {
     if (line_tokens.size() < TWO_ARGS) {
-        std::cout << "Wrong number of the arguments\n";
+        std::cout << "Wrong amount of the arguments\n";
         return;
     }
 
@@ -157,16 +156,11 @@ void action_detect(std::string& input_line) {
     }
     words.push_back(input_line);
 
-    try {
-        command = words.at(START);
+    command = words.at(START);
 
-        if (!command.compare("exit")) {
-            std::cout << "Thank you for using our product\n";
-            std::exit(EXIT_SUCCESS);
-        }
-
-    } catch (std::out_of_range& e) {
-        std::cout << "Sorry, error in my mind\n";
+    if (!command.compare("exit")) {
+        std::cout << "Thank you for using our product\n";
+        std::exit(EXIT_SUCCESS);
     }
 
     try {
@@ -175,4 +169,3 @@ void action_detect(std::string& input_line) {
         std::cout << "Invalid operation\n";
     }
 }
-
