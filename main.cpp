@@ -47,7 +47,12 @@ int main() {
     std::string input_line;
     auto user = std::make_unique<NetConfAgent>();
 
-    user->initSysrepo();
+    try {
+        user->initSysrepo();
+    } catch ( const std::exception& e ) {
+        std::cout << "Error. Try to start server.\n";
+        std::exit(EXIT_FAILURE);
+    }
 
     while(true) {
         std::getline(std::cin, input_line);

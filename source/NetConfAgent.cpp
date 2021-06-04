@@ -1,16 +1,16 @@
 #include <NetConfAgent.hpp>
 
 void NetConfAgent::initSysrepo() {
-    this->s_conn = std::make_shared<sysrepo::Connection>();
+    s_conn = std::make_shared<sysrepo::Connection>();
     std::cout << s_conn.get() << "  ";
-    this->s_sess = std::make_shared<sysrepo::Session>(s_conn);
+    s_sess = std::make_shared<sysrepo::Session>(s_conn);
     std::cout << s_sess.get() << "  ";
-    this->s_sub = std::make_shared<sysrepo::Subscribe>(s_sess);
+    s_sub = std::make_shared<sysrepo::Subscribe>(s_sess);
     std::cout << s_sub.get() << std::endl;
 }
 
 void NetConfAgent::closeSysrepo() {
-    this->s_sess->session_stop();
+    s_sess->session_stop();
 }
 
 //void NetConfAgent::subscribeforModelChanges(std::string& number) {
