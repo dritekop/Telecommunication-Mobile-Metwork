@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <regex>
 #include <cstdlib>
+#include <NetConfAgent.hpp>
 
 #define START 0
 #define SECOND_WORD 1
@@ -13,7 +14,7 @@
 #define ONE_ARG 1
 #define TWO_ARGS 2
 
-void action_detect(std::string&);
+void action_detect(std::string&, std::unique_ptr<NetConfAgent>&);
 void f_register(const std::vector<std::string>&);
 void f_unregister(const std::vector<std::string>&);
 void f_call(const std::vector<std::string>&);
@@ -21,6 +22,7 @@ void f_name(std::vector<std::string>&);
 void f_answer(const std::vector<std::string>&);
 void f_call_end(const std::vector<std::string>&);
 void f_reject(const std::vector<std::string>&);
+void f_exit(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
 
 std::string s_register = "register";
 std::string s_unregister = "unregister";
@@ -29,6 +31,7 @@ std::string s_name = "name";
 std::string s_answer = "answer";
 std::string s_reject = "reject";
 std::string s_call_end = "callEnd";
+std::string s_exit = "exit";
 
 std::map<const std::string, std::function<void(std::vector<std::string>&)>> command_list {
     {s_register, f_register},
@@ -42,10 +45,13 @@ std::map<const std::string, std::function<void(std::vector<std::string>&)>> comm
 
 int main() {
     std::string input_line;
+    auto user = std::make_unique<NetConfAgent>();
+
+    user->initSysrepo();
 
     while(true) {
         std::getline(std::cin, input_line);
-        action_detect(input_line);
+        action_detect(input_line, user);
     }
 }
 
@@ -77,7 +83,7 @@ void f_unregister(const std::vector<std::string>& line_tokens) {
 
 void f_call(const std::vector<std::string>& line_tokens) {
     if (line_tokens.size() != TWO_ARGS) {
-        std::cout << "Wrong amount of the arguments\n";
+        std::cout << "Wrong number of the arguments\n";
         return;
     }
 
@@ -94,7 +100,7 @@ void f_call(const std::vector<std::string>& line_tokens) {
 
 void f_name(std::vector<std::string>& line_tokens) {
     if (line_tokens.size() < TWO_ARGS) {
-        std::cout << "Wrong amount of the arguments\n";
+        std::cout << "Wrong number of the arguments\n";
         return;
     }
 
@@ -109,7 +115,7 @@ void f_name(std::vector<std::string>& line_tokens) {
 
     if (std::regex_match(name,name_regex)) {
         std::cout << name << std::endl;
-        std::cout << "Here I should change leaf name.\n";
+        std::cout << "Here I should change leaf name.\n"; 
     } else {
         std::cout << "Error. Change the name.\n";
     }
@@ -142,9 +148,18 @@ void f_call_end(const std::vector<std::string>& line_tokens) {
     std::cout << "caller and this number are no more busy\n";
 }
 
+void f_exit(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
+    if (line_tokens.size() != ONE_ARG) {
+        std::cout << "This command doesn't need any argument\n";
+        return;
+    }
 
+    std::cout << "Thank you for using our product\n";
+    user->closeSysrepo();
+    std::exit(EXIT_SUCCESS);
+}
 
-void action_detect(std::string& input_line) {
+void action_detect(std::string& input_line, std::unique_ptr<NetConfAgent>& user) {
     std::vector<std::string> words = {};
     std::string space_delimiter = " ";
     std::string command;
@@ -158,10 +173,8 @@ void action_detect(std::string& input_line) {
 
     command = words.at(START);
 
-    if (!command.compare("exit")) {
-        std::cout << "Thank you for using our product\n";
-        std::exit(EXIT_SUCCESS);
-    }
+    if (!command.compare(s_exit))
+        f_exit(words, user);
 
     try {
         command_list.at(command)(words);
@@ -169,3 +182,4 @@ void action_detect(std::string& input_line) {
         std::cout << "Invalid operation\n";
     }
 }
+
