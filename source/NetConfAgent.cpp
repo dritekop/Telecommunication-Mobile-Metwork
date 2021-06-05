@@ -16,10 +16,14 @@ void NetConfAgent::closeSysrepo() {
 }
 
 void NetConfAgent::fetchData(const std::string& number) {
-    const char* xpath = "/mobile-network:core/subscribers/number";
-    const char* const_number = &number[START];
-    auto value = std::make_shared<sysrepo::Val>((char *)const_number, SR_IDENTITYREF_T);
+    std::string s_xpath = "/mobile-network:core/subscribers[number='" + number + "']/state"; 
+    const char* xpath = &s_xpath[START];
+    const char* state = "idle";
+    auto value = std::make_shared<sysrepo::Val>((char*)state, SR_IDENTITYREF_T);
+
     _s_sess->set_item(xpath, value);
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    _s_sess->apply_changes();
 }
 
 //void NetConfAgent::subscribeforModelChanges(std::string& number) {}
