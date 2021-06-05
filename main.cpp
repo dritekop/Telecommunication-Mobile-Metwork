@@ -28,7 +28,7 @@ void f_call_end(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&)
 void f_reject(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
 void f_exit(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
 
-std::string xpath = "/mobile-network:core/subscribers[number='";
+std::string _number = "";
 
 std::string s_register = "register";
 std::string s_unregister = "unregister";
@@ -78,12 +78,18 @@ void f_register(const std::vector<std::string>& line_tokens, std::unique_ptr<Net
 
     if (std::regex_match(number,num_regex)) {
         user->fetchData(number);
+        _number = number;
     } else {
         std::cout << "Number should have format +380XXXXXXXXX\n";
     }
 }
 
 void f_unregister(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
+    if (!_number.length()) {
+        std::cout << "No registered number\n";
+        return;
+    }
+
     if (line_tokens.size() != ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
@@ -93,6 +99,11 @@ void f_unregister(const std::vector<std::string>& line_tokens, std::unique_ptr<N
 }
 
 void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
+    if (!_number.length()) {
+        std::cout << "No registered number\n";
+        return;
+    }
+
     if (line_tokens.size() != TWO_ARGS) {
         std::cout << "Wrong number of the arguments\n";
         return;
@@ -116,6 +127,11 @@ void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
 }
 
 void f_name(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
+    if (!_number.length()) {
+        std::cout << "No registered number\n";
+        return;
+    }
+
     if (line_tokens.size() < TWO_ARGS) {
         std::cout << "Wrong number of the arguments\n";
         return;
@@ -138,6 +154,11 @@ void f_name(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
 }
 
 void f_answer(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
+    if (!_number.length()) {
+        std::cout << "No registered number\n";
+        return;
+    }
+
     if (line_tokens.size() != ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
@@ -147,6 +168,11 @@ void f_answer(const std::vector<std::string>& line_tokens, std::unique_ptr<NetCo
 }
 
 void f_reject(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
+    if (!_number.length()) {
+        std::cout << "No registered number\n";
+        return;
+    }
+
     if (line_tokens.size() != ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
@@ -156,6 +182,11 @@ void f_reject(const std::vector<std::string>& line_tokens, std::unique_ptr<NetCo
 }
 
 void f_call_end(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
+    if (!_number.length()) {
+        std::cout << "No registered number\n";
+        return;
+    }
+
     if (line_tokens.size() != ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
@@ -170,7 +201,9 @@ void f_exit(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
         return;
     }
 
-    std::cout << "Thank you for using our product\n";
+    if (_number.length())
+        std::cout << "Thank you for using our product\n";
+    
     user->closeSysrepo();
     std::exit(EXIT_SUCCESS);
 }
