@@ -13,16 +13,22 @@
 #define ONE_FOR_SPACE 1
 #define ONE_ARG 1
 #define TWO_ARGS 2
+#define CALL 1
+#define ANSWER 2
+#define REJECT 3
+#define CALLEND 4
 
 void action_detect(std::string&, std::unique_ptr<NetConfAgent>&);
-void f_register(const std::vector<std::string>&);
-void f_unregister(const std::vector<std::string>&);
-void f_call(const std::vector<std::string>&);
-void f_name(std::vector<std::string>&);
-void f_answer(const std::vector<std::string>&);
-void f_call_end(const std::vector<std::string>&);
-void f_reject(const std::vector<std::string>&);
+void f_register(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
+void f_unregister(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
+void f_call(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
+void f_name(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
+void f_answer(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
+void f_call_end(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
+void f_reject(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
 void f_exit(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
+
+std::string xpath = "/mobile-network:core/subscribers[number='";
 
 std::string s_register = "register";
 std::string s_unregister = "unregister";
@@ -33,7 +39,7 @@ std::string s_reject = "reject";
 std::string s_call_end = "callEnd";
 std::string s_exit = "exit";
 
-std::map<const std::string, std::function<void(std::vector<std::string>&)>> command_list {
+std::map<const std::string, std::function<void(std::vector<std::string>&, std::unique_ptr<NetConfAgent>&)>> command_list {
     {s_register, f_register},
     {s_unregister, f_unregister},
     {s_call, f_call},
@@ -41,6 +47,7 @@ std::map<const std::string, std::function<void(std::vector<std::string>&)>> comm
     {s_answer, f_answer},
     {s_reject, f_reject},
     {s_call_end, f_call_end},
+    {s_exit, f_exit}
 };
 
 int main() {
@@ -60,7 +67,7 @@ int main() {
     }
 }
 
-void f_register(const std::vector<std::string>& line_tokens) {
+void f_register(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
     if (line_tokens.size() != TWO_ARGS) {
         std::cout << "Wrong number of the arguments\n";
         return;
@@ -70,14 +77,13 @@ void f_register(const std::vector<std::string>& line_tokens) {
     std::regex num_regex("\\+380([0-9]{9})");
 
     if (std::regex_match(number,num_regex)) {
-        std::cout << number << std::endl;
-        std::cout << "Here I should initialize the subscriber instance in the userlist.\n";
+        user->fetchData(number);
     } else {
         std::cout << "Number should have format +380XXXXXXXXX\n";
     }
 }
 
-void f_unregister(const std::vector<std::string>& line_tokens) {
+void f_unregister(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
     if (line_tokens.size() != ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
@@ -86,7 +92,7 @@ void f_unregister(const std::vector<std::string>& line_tokens) {
     std::cout << "Here I should delete the subscriber instance from the userlist.\n";
 }
 
-void f_call(const std::vector<std::string>& line_tokens) {
+void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
     if (line_tokens.size() != TWO_ARGS) {
         std::cout << "Wrong number of the arguments\n";
         return;
@@ -96,14 +102,20 @@ void f_call(const std::vector<std::string>& line_tokens) {
     std::regex num_regex("\\+380([0-9]{9})");
 
     if (std::regex_match(number, num_regex)) {
-        std::cout << number << std::endl;
-        std::cout << "Here I should initialize the changes of other subcriber.\n"; 
+        try {
+            std::cout << __PRETTY_FUNCTION__ << std::endl;
+            // std::string module_name = "";
+            // module_name += "/mobile-network:core/subscribers[number='" + number + "']" ;
+            // user->changeData(module_name, CALL);
+        } catch (const std::exception& e) {
+            std::cout << "Invalid number.\n";
+        } 
     } else {
         std::cout << "Number should have format +380XXXXXXXXX\n";
     }
 }
 
-void f_name(std::vector<std::string>& line_tokens) {
+void f_name(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
     if (line_tokens.size() < TWO_ARGS) {
         std::cout << "Wrong number of the arguments\n";
         return;
@@ -119,38 +131,37 @@ void f_name(std::vector<std::string>& line_tokens) {
     std::regex name_regex("[a-zA-Z]([ a-zA-Z0-9]+)");
 
     if (std::regex_match(name,name_regex)) {
-        std::cout << name << std::endl;
-        std::cout << "Here I should change leaf name.\n"; 
+        // user->registerOperData();
     } else {
         std::cout << "Error. Change the name.\n";
     }
 }
 
-void f_answer(const std::vector<std::string>& line_tokens) {
+void f_answer(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
     if (line_tokens.size() != ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
 
-    std::cout << "changing the state from active to busy\n";
+    // user->changeData();    
 }
 
-void f_reject(const std::vector<std::string>& line_tokens) {
+void f_reject(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
     if (line_tokens.size() != ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
 
-    std::cout << "caller and this number are no more active\n";
+    // user->changeData();
 }
 
-void f_call_end(const std::vector<std::string>& line_tokens) {
+void f_call_end(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
     if (line_tokens.size() != ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
 
-    std::cout << "caller and this number are no more busy\n";
+    // user->changeData();
 }
 
 void f_exit(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
@@ -178,11 +189,8 @@ void action_detect(std::string& input_line, std::unique_ptr<NetConfAgent>& user)
 
     command = words.at(START);
 
-    if (!command.compare(s_exit))
-        f_exit(words, user);
-
     try {
-        command_list.at(command)(words);
+        command_list.at(command)(words, user);
     } catch (std::out_of_range& e) {
         std::cout << "Invalid operation\n";
     }

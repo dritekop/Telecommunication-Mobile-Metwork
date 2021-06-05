@@ -12,7 +12,7 @@ public:
 
     void closeSysrepo();
 
-    // void fetchData();
+    void fetchData(const std::string&);
 
     //void subscribeforModelChanges(std::string& number);
 
@@ -22,12 +22,9 @@ public:
 
     // void notifySysrepo();
 
-    // void changeData();
+    void changeData(std::string&, std::string, uint8_t);
 
 private:
-    // std::unique_ptr<sysrepo::Connection> conn;
-    // std::unique_ptr<sysrepo::Session> sess;
-    // std::unique_ptr<sysrepo::Subscribe> sub;
     sysrepo::S_Connection _s_conn;
     sysrepo::S_Session _s_sess;
     sysrepo::S_Subscribe _s_sub;
