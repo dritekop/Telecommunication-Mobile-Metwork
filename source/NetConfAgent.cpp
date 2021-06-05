@@ -22,7 +22,6 @@ void NetConfAgent::fetchData(const std::string& number) {
     auto value = std::make_shared<sysrepo::Val>((char*)state, SR_IDENTITYREF_T);
 
     _s_sess->set_item(xpath, value);
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
     _s_sess->apply_changes();
 }
 
