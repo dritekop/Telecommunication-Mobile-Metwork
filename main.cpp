@@ -17,6 +17,8 @@
 #define ANSWER 2
 #define REJECT 3
 #define CALLEND 4
+#define REGISTER 1
+#define UNREGISTER 0
 
 void action_detect(std::string&, std::unique_ptr<NetConfAgent>&);
 void f_register(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
@@ -29,6 +31,7 @@ void f_reject(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
 void f_exit(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
 
 std::string _number = "";
+std::string _xpath = "";
 
 std::string s_register = "register";
 std::string s_unregister = "unregister";
@@ -77,7 +80,8 @@ void f_register(const std::vector<std::string>& line_tokens, std::unique_ptr<Net
     std::regex num_regex("\\+380([0-9]{9})");
 
     if (std::regex_match(number,num_regex)) {
-        user->fetchData(number);
+        _xpath = "/mobile-network:core/subscribers[number='" + number + "']";
+        user->fetchData(_xpath, REGISTER);
         _number = number;
     } else {
         std::cout << "Number should have format +380XXXXXXXXX\n";
@@ -114,10 +118,10 @@ void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
 
     if (std::regex_match(number, num_regex)) {
         try {
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
-            // std::string module_name = "";
-            // module_name += "/mobile-network:core/subscribers[number='" + number + "']" ;
-            // user->changeData(module_name, CALL);
+            std::string host_xpath = _xpath + "/state";
+            std::string guest_xpath = "";
+            guest_xpath += "/mobile-network:core/subscribers[number='" + number + "']/state";
+            user->changeData(host_xpath, guest_xpath, CALL);
         } catch (const std::exception& e) {
             std::cout << "Invalid number.\n";
         } 
