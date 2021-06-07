@@ -8,13 +8,13 @@
 
 class NetConfAgent {
 public:
-    /*Initialization of the class' fields*/
+    /* Initialization of the class' fields */
     void initSysrepo();
 
-    /*Takes a value of the leaf with its xpath from the model as a string value*/
+    /* ? gets the string - xpath with the leaf's value */
     std::string fetchData(const std::string&);
 
-    /**/
+    /* ? print the string xpath with the changed leaf's value */
     void subscribeForModelChanges(const std::string&);
 
     // void registerOperData();

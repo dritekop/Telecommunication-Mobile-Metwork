@@ -14,21 +14,13 @@ sigint_handler(int signum)
 
 /* Helper function for printing changes given operation, old and new value. */
 static void
-print_change(sysrepo::S_Change change) {
-    std::cout << std::endl;
-    switch(change->oper()) {
-        case SR_OP_CREATED:
-            break;
-        case SR_OP_MODIFIED:
-            if (nullptr != change->old_val() && nullptr != change->new_val()) {
-               std::cout << "User ";
-               std::cout << change->new_val()->to_string();
-            }
-            break;
-        case SR_OP_DELETED:
-            break;
-        case SR_OP_MOVED:
-            break;
+print_change(sysrepo::S_Change change) 
+{
+    if(change->oper() == SR_OP_MODIFIED) {
+        if (nullptr != change->old_val() && nullptr != change->new_val()) {
+           std::cout << "Change xpath: ";
+           std::cout << change->new_val()->to_string();
+        }
     }
 }
 
