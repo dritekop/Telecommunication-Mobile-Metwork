@@ -1,4 +1,5 @@
-project('mobnet', 'cpp')
+project('mobnet', 'cpp',
+    default_options : ['cpp_std=c++17'])
 
 subdir('source')
 

@@ -1,89 +1,90 @@
 #include <NetConfAgent.hpp>
+#include <csignal>
+#include <cstdlib>
 
-#define START 0
-#define BUSY 0
-#define ACTIVE 1
-#define IDLE 2
-#define REGISTER 0
-#define CALL 1
-#define ANSWER 2
-#define REJECT 3
-#define CALLEND 4
+#define MAX_LEN 100
 
-void NetConfAgent::initSysrepo() {
-    _s_conn = std::make_shared<sysrepo::Connection>();
-    _s_sess = std::make_shared<sysrepo::Session>(_s_conn);
-    _s_sub = std::make_shared<sysrepo::Subscribe>(_s_sess);
+volatile int exit_application = 0;
+
+static void
+sigint_handler(int signum)
+{
+    exit_application = 1;
 }
 
-void NetConfAgent::closeSysrepo() {
-    _s_sess->session_stop();
-}
-
-void NetConfAgent::fetchData(const std::string& s_xpath) {
-    std::cout << "THINK MAN!\n";
-}
-
-//void NetConfAgent::subscribeforModelChanges(std::string& number) {}
-
-// void NetConfAgent::registerOperData() {}
-
-// void NetConfAgent::subscribeForRpc() {}
-
-// void NetConfAgent::notifySysrepo() {}
-
-void NetConfAgent::changeData(const std::string& host_number, const std::string& guest_number,\
-                    std::string host_xpath, std::string guest_xpath, uint8_t action) {
-    if (action == REGISTER) {
-        host_xpath += "/state"; 
-        const char* xpath = &host_xpath[START];
-        const char* init_state = "idle";
-        sysrepo::S_Val value = std::make_shared<sysrepo::Val>((char*)init_state, SR_IDENTITYREF_T);
-        _s_sess->set_item(xpath, value);
-        _s_sess->apply_changes();
-
-    } else if (action == CALL) {
-        //to control if number exists
-        const char* control = guest_xpath.c_str();
-        _s_sess->get_item(control);
-
-        std::string host_state_xpath = host_xpath + "/state";
-        std::string guest_state_xpath = guest_xpath + "/state";
-        const char* c_host_state_xpath = host_state_xpath.c_str();
-        const char* c_guest_state_xpath = guest_state_xpath.c_str();
-        const char* state = "active";
-        _s_sess->set_item_str(c_host_state_xpath, state);      
-        _s_sess->set_item_str(c_guest_state_xpath, state);
-
-        std::string host_incoming_number_xpath = host_xpath + "/incomingNumber";
-        std::string guest_incoming_number_xpath = guest_xpath + "/incomingNumber";
-        const char* c_host_incoming_number_xpath = host_incoming_number_xpath.c_str();
-        const char* c_guest_incoming_number_xpath = guest_incoming_number_xpath.c_str();
-        const char* c_host_incoming_number = guest_number.c_str();
-        const char* c_guest_incoming_number = host_number.c_str();
-        _s_sess->set_item_str(c_host_incoming_number_xpath, c_host_incoming_number);      
-        _s_sess->set_item_str(c_guest_incoming_number_xpath, c_guest_incoming_number);
-        _s_sess->apply_changes();
-
-    } else if (action == ANSWER) {
-        host_xpath += "/state";
-
-    } else if (action == CALLEND) {
-        std::string host_state_xpath = host_xpath + "/state";
-        std::string guest_state_xpath = guest_xpath + "/state";
-        const char* c_host_state_xpath = host_state_xpath.c_str();
-        const char* c_guest_state_xpath = guest_state_xpath.c_str();
-        const char* state = "idle";
-        _s_sess->set_item_str(c_host_state_xpath, state);      
-        _s_sess->set_item_str(c_guest_state_xpath, state);
-
-        std::string host_incoming_number_xpath = host_xpath + "/incomingNumber";
-        std::string guest_incoming_number_xpath = guest_xpath + "/incomingNumber";
-        const char* c_host_incoming_number_xpath = host_incoming_number_xpath.c_str();
-        const char* c_guest_incoming_number_xpath = guest_incoming_number_xpath.c_str();
-        _s_sess->delete_item(c_host_incoming_number_xpath);      
-        _s_sess->delete_item(c_guest_incoming_number_xpath);
-        _s_sess->apply_changes();
+/* Helper function for printing changes given operation, old and new value. */
+static void
+print_change(sysrepo::S_Change change) {
+    std::cout << std::endl;
+    switch(change->oper()) {
+        case SR_OP_CREATED:
+            break;
+        case SR_OP_MODIFIED:
+            if (nullptr != change->old_val() && nullptr != change->new_val()) {
+               std::cout << "User ";
+               std::cout << change->new_val()->to_string();
+            }
+            break;
+        case SR_OP_DELETED:
+            break;
+        case SR_OP_MOVED:
+            break;
     }
 }
 
+/* Helper function for subscription */
+int func_for_sub(sysrepo::S_Session session, const char* module_name, const char* xpath,\
+     sr_event_t event, uint32_t request_id) 
+{
+    std::cout << "Waiting...\n";
+    
+    char change_path[MAX_LEN];
+    snprintf(change_path, MAX_LEN, "/%s:*//.", module_name);
+    
+    auto it = session->get_changes_iter(change_path);
+    
+    while (auto change = session->get_change_next(it)) 
+    {
+        print_change(change);
+    }
+
+    return SR_ERR_OK;
+}
+
+void NetConfAgent::initSysrepo() 
+{
+    _s_conn = std::make_shared<sysrepo::Connection>();
+    _s_sess = std::make_shared<sysrepo::Session>(_s_conn);
+}
+
+std::string NetConfAgent::fetchData(const std::string& s_xpath) 
+{
+    return _s_sess->get_item(s_xpath.c_str())->to_string();
+}
+
+void NetConfAgent::subscribeForModelChanges(const std::string& s_module_name) 
+{
+    auto sub = std::make_shared<sysrepo::Subscribe>(_s_sess);
+    sub->module_change_subscribe(s_module_name.c_str(), func_for_sub);
+    
+    /* loop until ctrl-c is pressed / SIGINT is received */
+    signal(SIGINT, sigint_handler);
+    while (!exit_application) {
+        
+    }
+}
+
+// void NetConfAgent::registerOperData() 
+// {}
+
+// void NetConfAgent::subscribeForRpc() 
+// {}
+
+// void NetConfAgent::notifySysrepo() 
+// {}
+
+void NetConfAgent::changeData(const std::string& s_xpath, const std::string& value) 
+{
+    _s_sess->set_item_str(s_xpath.c_str(), value.c_str());
+    _s_sess->apply_changes();
+}
