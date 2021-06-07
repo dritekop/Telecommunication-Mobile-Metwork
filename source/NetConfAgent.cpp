@@ -68,6 +68,22 @@ void NetConfAgent::changeData(const std::string& host_number, const std::string&
     } else if (action == ANSWER) {
         host_xpath += "/state";
 
+    } else if (action == CALLEND) {
+        std::string host_state_xpath = host_xpath + "/state";
+        std::string guest_state_xpath = guest_xpath + "/state";
+        const char* c_host_state_xpath = host_state_xpath.c_str();
+        const char* c_guest_state_xpath = guest_state_xpath.c_str();
+        const char* state = "idle";
+        _s_sess->set_item_str(c_host_state_xpath, state);      
+        _s_sess->set_item_str(c_guest_state_xpath, state);
+
+        std::string host_incoming_number_xpath = host_xpath + "/incomingNumber";
+        std::string guest_incoming_number_xpath = guest_xpath + "/incomingNumber";
+        const char* c_host_incoming_number_xpath = host_incoming_number_xpath.c_str();
+        const char* c_guest_incoming_number_xpath = guest_incoming_number_xpath.c_str();
+        _s_sess->delete_item(c_host_incoming_number_xpath);      
+        _s_sess->delete_item(c_guest_incoming_number_xpath);
+        _s_sess->apply_changes();
     }
 }
 

@@ -32,6 +32,7 @@ void f_exit(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
 std::string _number = "";
 std::string _xpath = "";
 std::string _incoming_number = "";
+std::string _guest_xpath = "";
 
 std::string s_register = "register";
 std::string s_unregister = "unregister";
@@ -114,7 +115,7 @@ void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
     }
 
     if (_incoming_number.length()) {
-        std::cout << "Sibscriber is busy\n";
+        std::cout << "Subscriber is busy\n";
         return;
     }
 
@@ -128,11 +129,11 @@ void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
 
     if (std::regex_match(number, num_regex)) {
         try {
-            std::string host_xpath = _xpath;
             std::string guest_xpath = "";
             guest_xpath += "/mobile-network:core/subscribers[number='" + number + "']";
+            _guest_xpath = guest_xpath;
             _incoming_number = number;
-            user->changeData(_number, _incoming_number, host_xpath, guest_xpath, CALL);
+            user->changeData(_number, _incoming_number, _xpath, guest_xpath, CALL);
         } catch (const std::exception& e) {
             std::cout << "Invalid number.\n";
         } 
@@ -202,12 +203,18 @@ void f_call_end(const std::vector<std::string>& line_tokens, std::unique_ptr<Net
         return;
     }
 
+    if (!_incoming_number.length()) {
+        std::cout << "It's impossible to end non-existing call :)\n";
+    }
+
     if (line_tokens.size() != ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
 
-    // user->changeData();
+    user->changeData("", "", _xpath, _guest_xpath, CALLEND);
+    _incoming_number.erase();
+    std::cout << _incoming_number << std::endl;
 }
 
 void f_exit(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
