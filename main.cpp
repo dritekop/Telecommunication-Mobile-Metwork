@@ -214,7 +214,7 @@ void f_call_end(const std::vector<std::string>& line_tokens, std::unique_ptr<Net
 
     user->changeData("", "", _xpath, _guest_xpath, CALLEND);
     _incoming_number.erase();
-    std::cout << _incoming_number << std::endl;
+    _guest_xpath.erase();
 }
 
 void f_exit(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
