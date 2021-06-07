@@ -123,9 +123,9 @@ void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
 
     if (std::regex_match(number, num_regex)) {
         try {
-            std::string host_xpath = _xpath + "/state";
+            std::string host_xpath = _xpath;
             std::string guest_xpath = "";
-            guest_xpath += "/mobile-network:core/subscribers[number='" + number + "']/state";
+            guest_xpath += "/mobile-network:core/subscribers[number='" + number + "']";
             _incoming_number = number;
             user->changeData(_number, _incoming_number, host_xpath, guest_xpath, CALL);
         } catch (const std::exception& e) {
