@@ -13,12 +13,11 @@
 #define ONE_FOR_SPACE 1
 #define ONE_ARG 1
 #define TWO_ARGS 2
+#define REGISTER 0
 #define CALL 1
 #define ANSWER 2
 #define REJECT 3
 #define CALLEND 4
-#define REGISTER 1
-#define UNREGISTER 0
 
 void action_detect(std::string&, std::unique_ptr<NetConfAgent>&);
 void f_register(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
@@ -32,6 +31,7 @@ void f_exit(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
 
 std::string _number = "";
 std::string _xpath = "";
+std::string _incoming_number = "";
 
 std::string s_register = "register";
 std::string s_unregister = "unregister";
@@ -81,7 +81,7 @@ void f_register(const std::vector<std::string>& line_tokens, std::unique_ptr<Net
 
     if (std::regex_match(number,num_regex)) {
         _xpath = "/mobile-network:core/subscribers[number='" + number + "']";
-        user->fetchData(_xpath, REGISTER);
+        user->changeData("", "", _xpath, "", REGISTER);
         _number = number;
     } else {
         std::cout << "Number should have format +380XXXXXXXXX\n";
@@ -108,6 +108,11 @@ void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
         return;
     }
 
+    if (_incoming_number.length()) {
+        std::cout << "Sibscriber is busy\n";
+        return;
+    }
+
     if (line_tokens.size() != TWO_ARGS) {
         std::cout << "Wrong number of the arguments\n";
         return;
@@ -121,7 +126,8 @@ void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
             std::string host_xpath = _xpath + "/state";
             std::string guest_xpath = "";
             guest_xpath += "/mobile-network:core/subscribers[number='" + number + "']/state";
-            user->changeData(host_xpath, guest_xpath, CALL);
+            _incoming_number = number;
+            user->changeData(_number, _incoming_number, host_xpath, guest_xpath, CALL);
         } catch (const std::exception& e) {
             std::cout << "Invalid number.\n";
         } 
