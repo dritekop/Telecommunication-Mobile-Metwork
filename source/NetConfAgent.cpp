@@ -43,6 +43,21 @@ int func_for_sub(sysrepo::S_Session session, const char* module_name, const char
     return SR_ERR_OK;
 }
 
+namespace netconfag {
+
+namespace markers {
+    int8_t START = 0;
+    int8_t SECOND_WORD = 1;
+    int8_t ONE_FOR_SPACE = 1;
+    uint8_t ONE_ARG = 1;
+    uint8_t TWO_ARGS = 2;
+    int8_t REGISTER = 0;
+    int8_t CALL = 1;
+    int8_t ANSWER = 2;
+    int8_t REJECT = 3;
+    int8_t CALLEND = 4;
+};
+
 void NetConfAgent::initSysrepo() 
 {
     _s_conn = std::make_shared<sysrepo::Connection>();
@@ -80,3 +95,5 @@ void NetConfAgent::changeData(const std::string& s_xpath, const std::string& val
     _s_sess->set_item_str(s_xpath.c_str(), value.c_str());
     _s_sess->apply_changes();
 }
+
+}; // namespace netconfag ends

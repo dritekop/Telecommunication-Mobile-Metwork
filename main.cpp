@@ -9,15 +9,15 @@
 #include <NetConfAgent.hpp>
 #include <csignal>
 
-void action_detect(std::string&, std::unique_ptr<NetConfAgent>&);
-void f_register(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
-void f_unregister(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
-void f_call(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
-void f_name(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
-void f_answer(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
-void f_call_end(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
-void f_reject(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
-void f_exit(const std::vector<std::string>&, std::unique_ptr<NetConfAgent>&);
+void action_detect(std::string&, std::unique_ptr<netconfag::NetConfAgent>&);
+void f_register(const std::vector<std::string>&, std::unique_ptr<netconfag::NetConfAgent>&);
+void f_unregister(const std::vector<std::string>&, std::unique_ptr<netconfag::NetConfAgent>&);
+void f_call(const std::vector<std::string>&, std::unique_ptr<netconfag::NetConfAgent>&);
+void f_name(const std::vector<std::string>&, std::unique_ptr<netconfag::NetConfAgent>&);
+void f_answer(const std::vector<std::string>&, std::unique_ptr<netconfag::NetConfAgent>&);
+void f_call_end(const std::vector<std::string>&, std::unique_ptr<netconfag::NetConfAgent>&);
+void f_reject(const std::vector<std::string>&, std::unique_ptr<netconfag::NetConfAgent>&);
+void f_exit(const std::vector<std::string>&, std::unique_ptr<netconfag::NetConfAgent>&);
 
 std::string s_register = "register";
 std::string s_unregister = "unregister";
@@ -28,7 +28,7 @@ std::string s_reject = "reject";
 std::string s_call_end = "callEnd";
 std::string s_exit = "exit";
 
-std::map<const std::string, std::function<void(std::vector<std::string>&, std::unique_ptr<NetConfAgent>&)>> command_list 
+std::map<const std::string, std::function<void(std::vector<std::string>&, std::unique_ptr<netconfag::NetConfAgent>&)>> command_list 
 {
     {s_register, f_register},
     {s_unregister, f_unregister},
@@ -40,21 +40,10 @@ std::map<const std::string, std::function<void(std::vector<std::string>&, std::u
     {s_exit, f_exit}
 };
 
-int8_t START = 0;
-int8_t SECOND_WORD = 1;
-int8_t ONE_FOR_SPACE = 1;
-uint8_t ONE_ARG = 1;
-uint8_t TWO_ARGS = 2;
-int8_t REGISTER = 0;
-int8_t CALL = 1;
-int8_t ANSWER = 2;
-int8_t REJECT = 3;
-int8_t CALLEND = 4;
-
 int main() 
 {
     std::string input_line;
-    auto user = std::make_unique<NetConfAgent>();
+    auto user = std::make_unique<netconfag::NetConfAgent>();
 
     try {
         user->initSysrepo();
@@ -63,6 +52,7 @@ int main()
         std::exit(EXIT_FAILURE);
     }
 
+    user->changeData("/mobile-network:core/subscribers[number='+380977777777']/state", "idle");
     bool x;
     std::cin >> x;
     if (x)
@@ -70,11 +60,8 @@ int main()
     else
         user->changeData("/mobile-network:core/subscribers[number='+380977777777']/state", "active");
 
-    /*
     std::cout << user->fetchData("/mobile-network:core/subscribers[number='+380977777777']/state");
-    // output: /mobile-network:core/subscribers[number='+380977777777']/state = idle
-    */
-
+    // possible output: /mobile-network:core/subscribers[number='+380977777777']/state = active
 
     // while(true) 
     // {
@@ -83,14 +70,14 @@ int main()
     // }
 }
 
-void f_register(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) 
+void f_register(const std::vector<std::string>& line_tokens, std::unique_ptr<netconfag::NetConfAgent>& user) 
 {
-    if (line_tokens.size() != TWO_ARGS) {
+    if (line_tokens.size() != netconfag::markers::TWO_ARGS) {
         std::cout << "Wrong number of the arguments\n";
         return;
     }
 
-    std::string number = line_tokens.at(SECOND_WORD);
+    std::string number = line_tokens.at(netconfag::markers::SECOND_WORD);
     std::regex num_regex("\\+380([0-9]{9})");
 
     if (std::regex_match(number,num_regex)) {
@@ -101,9 +88,9 @@ void f_register(const std::vector<std::string>& line_tokens, std::unique_ptr<Net
     }
 }
 
-void f_unregister(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) 
+void f_unregister(const std::vector<std::string>& line_tokens, std::unique_ptr<netconfag::NetConfAgent>& user) 
 {
-    if (line_tokens.size() != ONE_ARG) {
+    if (line_tokens.size() != netconfag::markers::ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
@@ -111,14 +98,14 @@ void f_unregister(const std::vector<std::string>& line_tokens, std::unique_ptr<N
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
-void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) 
+void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<netconfag::NetConfAgent>& user) 
 {
-    if (line_tokens.size() != TWO_ARGS) {
+    if (line_tokens.size() != netconfag::markers::TWO_ARGS) {
         std::cout << "Wrong number of the arguments\n";
         return;
     }
 
-    std::string number = line_tokens.at(SECOND_WORD);
+    std::string number = line_tokens.at(netconfag::markers::SECOND_WORD);
     std::regex num_regex("\\+380([0-9]{9})");
 
     if (std::regex_match(number, num_regex)) {
@@ -133,9 +120,9 @@ void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
     }
 }
 
-void f_name(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) 
+void f_name(const std::vector<std::string>& line_tokens, std::unique_ptr<netconfag::NetConfAgent>& user) 
 {
-    if (line_tokens.size() < TWO_ARGS) {
+    if (line_tokens.size() < netconfag::markers::TWO_ARGS) {
         std::cout << "Wrong number of the arguments\n";
         return;
     }
@@ -145,7 +132,7 @@ void f_name(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
     for (std::string i : line_tokens)
         name += i + " ";
 
-    name.erase(START, s_name.length() + ONE_FOR_SPACE);
+    name.erase(netconfag::markers::START, s_name.length() + netconfag::markers::ONE_FOR_SPACE);
 
     std::regex name_regex("[a-zA-Z]([ a-zA-Z0-9]+)");
 
@@ -158,9 +145,9 @@ void f_name(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
 
 }
 
-void f_answer(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) 
+void f_answer(const std::vector<std::string>& line_tokens, std::unique_ptr<netconfag::NetConfAgent>& user) 
 {
-    if (line_tokens.size() != ONE_ARG) {
+    if (line_tokens.size() != netconfag::markers::ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
@@ -168,9 +155,9 @@ void f_answer(const std::vector<std::string>& line_tokens, std::unique_ptr<NetCo
     std::cout << __PRETTY_FUNCTION__ << std::endl;    
 }
 
-void f_reject(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) 
+void f_reject(const std::vector<std::string>& line_tokens, std::unique_ptr<netconfag::NetConfAgent>& user) 
 {
-    if (line_tokens.size() != ONE_ARG) {
+    if (line_tokens.size() != netconfag::markers::ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
@@ -178,9 +165,9 @@ void f_reject(const std::vector<std::string>& line_tokens, std::unique_ptr<NetCo
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
-void f_call_end(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) 
+void f_call_end(const std::vector<std::string>& line_tokens, std::unique_ptr<netconfag::NetConfAgent>& user) 
 {
-    if (line_tokens.size() != ONE_ARG) {
+    if (line_tokens.size() != netconfag::markers::ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
@@ -188,9 +175,9 @@ void f_call_end(const std::vector<std::string>& line_tokens, std::unique_ptr<Net
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
-void f_exit(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) 
+void f_exit(const std::vector<std::string>& line_tokens, std::unique_ptr<netconfag::NetConfAgent>& user) 
 {
-    if (line_tokens.size() != ONE_ARG) {
+    if (line_tokens.size() != netconfag::markers::ONE_ARG) {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
@@ -200,20 +187,20 @@ void f_exit(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConf
     std::exit(EXIT_SUCCESS);
 }
 
-void action_detect(std::string& input_line, std::unique_ptr<NetConfAgent>& user) 
+void action_detect(std::string& input_line, std::unique_ptr<netconfag::NetConfAgent>& user) 
 {
     std::vector<std::string> words = {};
     std::string space_delimiter = " ";
     std::string command;
 
-    size_t pos = START;
+    size_t pos = netconfag::markers::START;
     while ((pos = input_line.find(space_delimiter)) != std::string::npos) {
-        words.push_back(input_line.substr(START, pos));
-        input_line.erase(START, pos + space_delimiter.length());
+        words.push_back(input_line.substr(netconfag::markers::START, pos));
+        input_line.erase(netconfag::markers::START, pos + space_delimiter.length());
     }
     words.push_back(input_line);
 
-    command = words.at(START);
+    command = words.at(netconfag::markers::START);
 
     try {
         command_list.at(command)(words, user);
