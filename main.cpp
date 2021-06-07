@@ -71,6 +71,11 @@ int main() {
 }
 
 void f_register(const std::vector<std::string>& line_tokens, std::unique_ptr<NetConfAgent>& user) {
+    if (_number.length()) {
+        std::cout << "Registered number exists\n";
+        return;
+    }
+
     if (line_tokens.size() != TWO_ARGS) {
         std::cout << "Wrong number of the arguments\n";
         return;
