@@ -2,6 +2,8 @@
 #define NET_CONF_AGENT_HPP
 
 #include <memory>
+#include <csignal>
+#include <cstdlib>
 
 #include <sysrepo-cpp/Session.hpp>
 #include <sysrepo-cpp/Connection.hpp>
@@ -29,14 +31,14 @@ public:
     /* ? gets the string - xpath with the leaf's value */
     std::string fetchData(const std::string&);
 
-    /* ? print the string xpath with the changed leaf's value */
+    /* ? prints the string xpath with the changed leaf's value */
     void subscribeForModelChanges(const std::string&);
 
     // void registerOperData();
 
-    // void subscribeForRpc();
+    void subscribeForRpc(const std::string&);
 
-    // void notifySysrepo();
+    void notifySysrepo(const std::string&);
 
     /*Wrapper to use cpp-binding functions to change the leaf in the model*/
     void changeData(const std::string&, const std::string&);

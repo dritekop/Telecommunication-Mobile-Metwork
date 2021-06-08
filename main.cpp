@@ -6,8 +6,8 @@
 #include <stdexcept>
 #include <regex>
 #include <cstdlib>
+
 #include <NetConfAgent.hpp>
-#include <csignal>
 
 void action_detect(std::string&, std::unique_ptr<netconfag::NetConfAgent>&);
 void f_register(const std::vector<std::string>&, std::unique_ptr<netconfag::NetConfAgent>&);
@@ -52,7 +52,13 @@ int main()
         std::exit(EXIT_FAILURE);
     }
 
+
     user->changeData("/mobile-network:core/subscribers[number='+380977777777']/state", "idle");
+    /*
+    user->subscribeForRpc("/mobile-network:core");
+    terminate called after throwing an instance of 'sysrepo::sysrepo_exception'
+    what():  Invalid argument
+    */
     bool x;
     std::cin >> x;
     if (x)
