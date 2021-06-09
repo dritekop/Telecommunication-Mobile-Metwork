@@ -50,6 +50,7 @@ int main()
     user->changeData("/mobile-network:core/subscribers[number='+380977777777']/state", "idle");
 
     bool wau = user->registerOperData("mobile-network", "/mobile-network:core/subscribers[number='+380977777777']");
+    //nothing is changed in database
     std::cout << wau << std::endl;
 
     std::string val;
@@ -59,8 +60,7 @@ int main()
     
     
     user->subscribeForRpc("/mobile-network:core");
-    // terminate called after throwing an instance of 'sysrepo::sysrepo_exception'
-    // what():  Invalid argument
+    // Invalid argument
     
     bool x;
     std::cin >> x;
