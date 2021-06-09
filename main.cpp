@@ -5,7 +5,7 @@
 #include <functional>
 #include <stdexcept>
 #include <regex>
-#include <cstdlib>
+// #include <>
 
 #include <NetConfAgent.hpp>
 
@@ -45,20 +45,23 @@ int main()
     std::string input_line;
     auto user = std::make_unique<netconfag::NetConfAgent>();
 
-    try {
-        user->initSysrepo();
-    } catch ( const std::exception& e ) {
-        std::cout << "Error. Try to start server.\n";
-        std::exit(EXIT_FAILURE);
-    }
-
+    user->initSysrepo();
 
     user->changeData("/mobile-network:core/subscribers[number='+380977777777']/state", "idle");
-    /*
+
+    bool wau = user->registerOperData("mobile-network", "/mobile-network:core/subscribers[number='+380977777777']");
+    std::cout << wau << std::endl;
+
+    std::string val;
+    user->fetchData("/mobile-network:core/subscribers[number='+380977777777']/userName", val);
+    //item not found
+    std::cout << val << std::endl;
+    
+    
     user->subscribeForRpc("/mobile-network:core");
-    terminate called after throwing an instance of 'sysrepo::sysrepo_exception'
-    what():  Invalid argument
-    */
+    // terminate called after throwing an instance of 'sysrepo::sysrepo_exception'
+    // what():  Invalid argument
+    
     bool x;
     std::cin >> x;
     if (x)
@@ -66,8 +69,8 @@ int main()
     else
         user->changeData("/mobile-network:core/subscribers[number='+380977777777']/state", "active");
 
-    std::cout << user->fetchData("/mobile-network:core/subscribers[number='+380977777777']/state");
-    // possible output: /mobile-network:core/subscribers[number='+380977777777']/state = active
+    user->fetchData("/mobile-network:core/subscribers[number='+380977777777']/state", val);
+    std::cout << val << std::endl;
 
     // while(true) 
     // {
@@ -148,7 +151,6 @@ void f_name(const std::vector<std::string>& line_tokens, std::unique_ptr<netconf
     else {
         std::cout << "Error. Change the name.\n";
     }
-
 }
 
 void f_answer(const std::vector<std::string>& line_tokens, std::unique_ptr<netconfag::NetConfAgent>& user) 

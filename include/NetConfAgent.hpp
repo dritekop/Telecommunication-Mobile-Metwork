@@ -4,9 +4,11 @@
 #include <memory>
 #include <csignal>
 #include <cstdlib>
+#include <unistd.h>
 
 #include <sysrepo-cpp/Session.hpp>
 #include <sysrepo-cpp/Connection.hpp>
+// #include <libyang/Libyang.hpp>
 
 namespace netconfag {
 
@@ -26,22 +28,25 @@ namespace markers {
 class NetConfAgent {
 public:
     /* Initialization of the class' fields */
-    void initSysrepo();
+    bool initSysrepo();
 
     /* ? gets the string - xpath with the leaf's value */
-    std::string fetchData(const std::string&);
+    bool fetchData(const std::string&, std::string&);
 
     /* ? prints the string xpath with the changed leaf's value */
-    void subscribeForModelChanges(const std::string&);
+    bool subscribeForModelChanges(const std::string&);
 
-    // void registerOperData();
+    /* */
+    bool registerOperData(const std::string&, const std::string&);
 
-    void subscribeForRpc(const std::string&);
+    /* */
+    bool subscribeForRpc(const std::string&);
 
-    void notifySysrepo(const std::string&);
+    /* */
+    bool notifySysrepo(const std::string&);
 
     /*Wrapper to use cpp-binding functions to change the leaf in the model*/
-    void changeData(const std::string&, const std::string&);
+    bool changeData(const std::string&, const std::string&);
 
 private:
     sysrepo::S_Connection _s_conn;

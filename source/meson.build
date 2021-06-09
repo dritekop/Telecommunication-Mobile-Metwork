@@ -18,5 +18,5 @@ net_conf_agent_sl = static_library(
 
 net_conf_ag_dep = declare_dependency(
     link_with : net_conf_agent_sl,
-    include_directories : inc
+    include_directories : inc,
 )
