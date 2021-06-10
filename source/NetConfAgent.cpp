@@ -12,19 +12,6 @@ sigint_handler(int signum)
 
 namespace netconfag {
 
-namespace markers {
-    int8_t START = 0;
-    int8_t SECOND_WORD = 1;
-    int8_t ONE_FOR_SPACE = 1;
-    uint8_t ONE_ARG = 1;
-    uint8_t TWO_ARGS = 2;
-    int8_t REGISTER = 0;
-    int8_t CALL = 1;
-    int8_t ANSWER = 2;
-    int8_t REJECT = 3;
-    int8_t CALLEND = 4;
-};
-
 bool NetConfAgent::initSysrepo() 
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -34,6 +21,17 @@ bool NetConfAgent::initSysrepo()
         return true;
     } catch (const std::exception& e) {
         std::cout << "Error. Try to start server.\n";
+        std::cout << e.what() << std::endl;
+        return false;
+    }
+}
+
+bool NetConfAgent::closeSys() {
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    try {
+        _s_sess->session_stop();
+        return true;
+    } catch (const std::exception& e) {
         std::cout << e.what() << std::endl;
         return false;
     }
@@ -84,58 +82,37 @@ bool NetConfAgent::subscribeForModelChanges(const std::string& s_module_name)
     }
 }
 
-bool NetConfAgent::registerOperData(const std::string& module_name, const std::string& xpath) 
+bool NetConfAgent::registerOperData(const std::string& module_name, const std::string& xpath, const std::string& oper_value) 
 {
     try {
         auto subscribe = std::make_shared<sysrepo::Subscribe>(_s_sess);
-      
-        auto cb2 = [] (sysrepo::S_Session session, const char *module_name, const char *path, const char *request_xpath,
+        std::string sub_path = xpath;
+        sub_path.erase(sub_path.rfind("/"));
+        std::cout << sub_path << std::endl;
+        
+        auto cb = [xpath, oper_value] (sysrepo::S_Session session, const char *module_name, const char *path, const char *request_xpath,
             uint32_t request_id, libyang::S_Data_Node &parent) {
-            std::cout << "\n\n ========== CALLBACK CALLED TO PROVIDE \"" << path << "\" DATA ==========\n" << std::endl;
-
             libyang::S_Context ctx = session->get_context();
             libyang::S_Module mod = ctx->get_module(module_name);
 
-            parent->new_path(ctx, "/mobile-network:core/subscribers[number='+380977777777']/userName", "Bob",\
-                LYD_ANYDATA_CONSTSTRING, 0);
-            // auto subscribers = std::make_shared<libyang::Data_Node>(parent, mod, "subscribers");
-            // // auto number = std::make_shared<libyang::Data_Node>(subscribers, mod, "number", "+380984618519");
-            // auto name = std::make_shared<libyang::Data_Node>(subscribers, mod, "userName", "Boom");
-            std::cout << "BOBOBOBOB\n";
+            parent->new_path(ctx, xpath.c_str(), oper_value.c_str(), LYD_ANYDATA_CONSTSTRING, 0);
+            std::cout << __PRETTY_FUNCTION__ << std::endl;
 
             return SR_ERR_OK;
         };
 
+        subscribe->oper_get_items_subscribe(module_name.c_str(), cb, sub_path.c_str());
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
 
-        // auto cb = [] (sysrepo::S_Session session, const char* module_name, 
-        //         const char* path, const char* request_xpath,
-        //         uint32_t request_id, libyang::S_Data_Node &parent) {
-        //     libyang::S_Context ctx = session->get_context();
-        //     libyang::S_Module mod = ctx->get_module(module_name);
-
-        //     auto subscribers = std::make_shared<libyang::Data_Node>(parent, mod, "subscribers['+380977777777']");
-        //     // auto number = std::make_shared<libyang::Data_Node>(subscribers, mod, "number", "+380984618519");
-        //     auto name = std::make_shared<libyang::Data_Node>(subscribers, mod, "userName", "Boom");
-        //     std::cout << "BOBOBOBOB\n";
-        //     // libyang::S_Data_Node subs(new libyang::Data_Node(parent, mod, "subscribers"));
-        //     // libyang::S_Data_Node name(new libyang::Data_Node(subs, mod, "userName", "Boom"));
-        //     /* loop until ctrl-c is pressed / SIGINT is received 
-        // */
-
-        //     // return SR_ERR_OK; 
-        // };
-
-        subscribe->oper_get_items_subscribe(module_name.c_str(), cb2, xpath.c_str());
-
+        /* loop until ctrl-c is pressed / SIGINT is received 
+        */
         signal(SIGINT, sigint_handler);
         while (!exit_application) {
 
         }
         return true;
-
-        return true;
     } catch (const std::exception& e) {
-        std::cout << e.what() << std::endl;        
+        std::cout << e.what() << " WHATAFUCK!!!!" << std::endl;        
         return false;
     }
 }

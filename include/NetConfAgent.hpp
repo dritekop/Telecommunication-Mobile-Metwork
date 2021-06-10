@@ -12,23 +12,13 @@
 
 namespace netconfag {
 
-namespace markers {
-    extern int8_t START;
-    extern int8_t SECOND_WORD;
-    extern int8_t ONE_FOR_SPACE;
-    extern uint8_t ONE_ARG;
-    extern uint8_t TWO_ARGS;
-    extern int8_t REGISTER;
-    extern int8_t CALL;
-    extern int8_t ANSWER;
-    extern int8_t REJECT;
-    extern int8_t CALLEND;
-};
-
 class NetConfAgent {
-public:
+public:    
     /* Initialization of the class' fields */
     bool initSysrepo();
+
+    /* */
+    bool closeSys();
 
     /* ? gets the string - xpath with the leaf's value */
     bool fetchData(const std::string&, std::string&);
@@ -37,7 +27,7 @@ public:
     bool subscribeForModelChanges(const std::string&);
 
     /* */
-    bool registerOperData(const std::string&, const std::string&);
+    bool registerOperData(const std::string&, const std::string&, const std::string&);
 
     /* */
     bool subscribeForRpc(const std::string&);
