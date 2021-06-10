@@ -9,11 +9,11 @@
 #include <NetConfAgent.hpp>
 
 namespace {
-    int8_t START = 0;
-    int8_t SECOND_WORD = 1;
-    int8_t ONE_FOR_SPACE = 1;
-    uint8_t ONE_ARG = 1;
-    uint8_t TWO_ARGS = 2;
+    const int8_t START = 0;
+    const int8_t SECOND_WORD = 1;
+    const int8_t ONE_FOR_SPACE = 1;
+    const uint8_t ONE_ARG = 1;
+    const uint8_t TWO_ARGS = 2;
 };
 
 void action_detect(std::string&, std::unique_ptr<netconfag::NetConfAgent>&);
@@ -57,25 +57,10 @@ int main()
     user->changeData("/mobile-network:core/subscribers[number='001']/state", "idle");
 
     user->registerOperData("mobile-network", "/mobile-network:core/subscribers[number='+380977777777']/userName", "Bob");
-    user->closeSys();
-    // std::string val;
-    // user->fetchData("/mobile-network:core/subscribers[number='+380977777777']/userName", val);
-    // //item not found
-    // std::cout << val << std::endl;
-    
-    
-    // user->subscribeForRpc("/mobile-network:core");
-    // // Invalid argument
-    
-    // bool x;
-    // std::cin >> x;
-    // if (x)
-    //     user->subscribeForModelChanges("mobile-network");
-    // else
-    //     user->changeData("/mobile-network:core/subscribers[number='+380977777777']/state", "active");
 
-    // user->fetchData("/mobile-network:core/subscribers[number='+380977777777']/state", val);
-    // std::cout << val << std::endl;
+    user->subscribeForRpc("blablabla");
+
+    user->closeSys();
 
     // while(true) 
     // {

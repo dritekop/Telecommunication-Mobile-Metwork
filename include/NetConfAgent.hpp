@@ -14,19 +14,43 @@ namespace netconfag {
 
 class NetConfAgent {
 public:    
-    /* Initialization of the class' fields */
+    /*    
+    *@breaf establishes sysrepo session
+    *
+    *@param no
+    *
+    *@return true if ok, otherwise false
+    */
     bool initSysrepo();
 
     /* */
     bool closeSys();
 
-    /* ? gets the string - xpath with the leaf's value */
+    /*    
+    *@breaf gets data
+    *
+    *@param string xpath, string where value will be written
+    *
+    *@return true if ok, otherwise false
+    */
     bool fetchData(const std::string&, std::string&);
 
-    /* ? prints the string xpath with the changed leaf's value */
+    /*    
+    *@breaf print changes in the module
+    *
+    *@param module name
+    *
+    *@return true if ok, otherwise false
+    */
     bool subscribeForModelChanges(const std::string&);
 
-    /* */
+    /*    
+    *@breaf register operational data and sets value to the noconfig leaf
+    *
+    *@param string module name, string xpath, string value 
+    *
+    *@return true if ok, otherwise false
+    */
     bool registerOperData(const std::string&, const std::string&, const std::string&);
 
     /* */
@@ -35,7 +59,13 @@ public:
     /* */
     bool notifySysrepo(const std::string&);
 
-    /*Wrapper to use cpp-binding functions to change the leaf in the model*/
+    /*    
+    *@breaf sets data for leaf of the model instance
+    *
+    *@param string xpath, string value
+    *
+    *@return true if ok, otherwise false
+    */
     bool changeData(const std::string&, const std::string&);
 
 private:

@@ -1,0 +1,39 @@
+module MOBILENETWORK {
+    namespace "ns:MONE";
+
+    prefix MONET;
+
+    rpc something {
+        input {
+          leaf what_does_this_do {
+            type string;
+          }
+        }
+
+        output {           
+            leaf incomingNumber{
+                description "Incoming number";
+                type string;
+            }
+            
+            leaf state{
+                description "User's state";
+                type enumeration {
+                     enum busy; 
+                     enum active ;
+                     enum idle;
+                }
+            }     
+        }
+    }
+
+    notification test-notif {
+        leaf val1 {
+          type string;
+        }
+        leaf val2 {
+          type string;
+        }
+    }
+   
+}
