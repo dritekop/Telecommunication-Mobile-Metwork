@@ -131,9 +131,12 @@ bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amo
             for(size_t n = 0; n < input->val_cnt(); ++n) {
                 auto value = input->val(n);
                 std::cout << value->xpath();
-                std::cout << "= " << value->data()->get_string() << std::endl;    
+                std::cout << " = " << value->data()->get_string() << std::endl;    
             }
 
+            /* 
+            the structure of the code below matches to the yang model MOBILENETWORK.
+            */
             std::map<std::string,std::string>::const_iterator it = leaf_name_value.begin();
             std::pair<std::string, std::string> name_value = *it;
             std::string name = s_xpath + "/" + name_value.first;
@@ -149,10 +152,10 @@ bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amo
             std::cout << "\n ========== PRINT RETURN VALUE ==========\n" << std::endl;
             auto value = out_vals->val(0);
             std::cout << value->xpath();
-            std::cout << "= " << value->data()->get_string() << std::endl;
+            std::cout << " = " << value->data()->get_string() << std::endl;
             value = out_vals->val(1);
             std::cout << value->xpath();
-            std::cout << "= " << value->data()->get_enum() << std::endl;
+            std::cout << " = " << value->data()->get_enum() << std::endl;
             
             return SR_ERR_OK;
         };
@@ -160,14 +163,12 @@ bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amo
         std::cout << "\n ========== SUBSCRIBE TO RPC CALL ==========\n" << std::endl;
         subscribe->rpc_subscribe(s_xpath.c_str(), cbVals, 1);
 
-        auto in_vals = std::make_shared<sysrepo::Vals>(2);
+        auto in_vals = std::make_shared<sysrepo::Vals>(1);
 
-        in_vals->val(0)->set("/MOBILENETWORK:something/what_does_this_do", "AND", SR_ENUM_T);
-        in_vals->val(1)->set("/MOBILENETWORK:something/what_does_this_do", "WHAT", SR_ENUM_T);        
+        in_vals->val(0)->set("/MOBILENETWORK:something/what_does_this_do", "AND", SR_ENUM_T);       
 
         std::cout << "\n ========== START RPC CALL FROM THE METHOD. SHOULD BE CHANGED ==========\n" << std::endl;
         auto out_vals = _s_sess->rpc_send("/MOBILENETWORK:something", in_vals);
-
 
         return true;
     } catch (const std::exception& e) {
