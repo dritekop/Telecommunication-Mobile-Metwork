@@ -143,7 +143,7 @@ bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amo
             std::cout << name << std::endl;
             out_vals->val(0)->set(name.c_str(), name_value.second.c_str(), SR_STRING_T);
 
-            it++;
+            ++it;
             name_value = *it;
             name = s_xpath + "/" + name_value.first;
             std::cout << name << std::endl;
