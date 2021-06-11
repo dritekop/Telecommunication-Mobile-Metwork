@@ -58,7 +58,11 @@ int main()
 
     user->registerOperData("mobile-network", "/mobile-network:core/subscribers[number='+380977777777']/userName", "Bob");
 
-    user->subscribeForRpc("blablabla");
+    std::map<std::string, std::string> names = {
+        {"incomingNumber", "001"},
+        {"state", "active"},
+    };
+    user->subscribeForRpc("/MOBILENETWORK:something", 2, names);
 
     user->closeSys();
 

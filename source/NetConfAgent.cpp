@@ -117,54 +117,56 @@ bool NetConfAgent::registerOperData(const std::string& module_name, const std::s
     }
 }
 
-bool NetConfAgent::subscribeForRpc(const std::string& s_xpath) 
+bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amount, const std::map<std::string, std::string>& leaf_name_value) 
 {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    std::cout << std::endl << __PRETTY_FUNCTION__ << std::endl;
     try {
         auto subscribe = std::make_shared<sysrepo::Subscribe>(_s_sess);
-        auto cbVals = [](sysrepo::S_Session session, const char* op_path, const sysrepo::S_Vals input, sr_event_t event, uint32_t request_id, sysrepo::S_Vals_Holder output) {
+        auto cbVals = [s_xpath, amount, leaf_name_value](sysrepo::S_Session session, const char* op_path, const sysrepo::S_Vals input,\
+            sr_event_t event, uint32_t request_id, sysrepo::S_Vals_Holder output) {
             std::cout << "\n ========== RPC CALLED ==========\n" << std::endl;
 
-            auto out_vals = output->allocate(2);
+            auto out_vals = output->allocate(amount);
 
             for(size_t n = 0; n < input->val_cnt(); ++n) {
-                auto value = input->val(0);
+                auto value = input->val(n);
                 std::cout << value->xpath();
                 std::cout << "= " << value->data()->get_string() << std::endl;    
             }
 
-            out_vals->val(0)->set("/MOBILENETWORK:something/incomingNumber",
-                    "001",
-                    SR_STRING_T);
-            out_vals->val(1)->set("/MOBILENETWORK:something/state",
-                    "busy",
-                    SR_STRING_T);
+            std::map<std::string,std::string>::const_iterator it = leaf_name_value.begin();
+            std::pair<std::string, std::string> name_value = *it;
+            std::string name = s_xpath + "/" + name_value.first;
+            std::cout << name << std::endl;
+            out_vals->val(0)->set(name.c_str(), name_value.second.c_str(), SR_STRING_T);
+
+            it++;
+            name_value = *it;
+            name = s_xpath + "/" + name_value.first;
+            std::cout << name << std::endl;
+            out_vals->val(1)->set(name.c_str(), name_value.second.c_str(), SR_ENUM_T);
+
+            std::cout << "\n ========== PRINT RETURN VALUE ==========\n" << std::endl;
+            auto value = out_vals->val(0);
+            std::cout << value->xpath();
+            std::cout << "= " << value->data()->get_string() << std::endl;
+            value = out_vals->val(1);
+            std::cout << value->xpath();
+            std::cout << "= " << value->data()->get_enum() << std::endl;
             
             return SR_ERR_OK;
         };
 
         std::cout << "\n ========== SUBSCRIBE TO RPC CALL ==========\n" << std::endl;
-        subscribe->rpc_subscribe("/MOBILENETWORK:something", cbVals, 1);
-        
+        subscribe->rpc_subscribe(s_xpath.c_str(), cbVals, 1);
+
         auto in_vals = std::make_shared<sysrepo::Vals>(2);
 
-        in_vals->val(0)->set("/MOBILENETWORK:something/what_does_this_do",
-                           "AND",
-               SR_STRING_T);
-        in_vals->val(1)->set("/MOBILENETWORK:something/what_does_this_do",
-                           "WHAT",
-               SR_STRING_T);        
+        in_vals->val(0)->set("/MOBILENETWORK:something/what_does_this_do", "AND", SR_ENUM_T);
+        in_vals->val(1)->set("/MOBILENETWORK:something/what_does_this_do", "WHAT", SR_ENUM_T);        
 
-        std::cout << "\n ========== START RPC CALL ==========\n" << std::endl;
+        std::cout << "\n ========== START RPC CALL FROM THE METHOD. SHOULD BE CHANGED ==========\n" << std::endl;
         auto out_vals = _s_sess->rpc_send("/MOBILENETWORK:something", in_vals);
-
-        std::cout << "\n ========== PRINT RETURN VALUE ==========\n" << std::endl;
-        auto value = out_vals->val(0);
-        std::cout << value->xpath();
-        std::cout << "= " << value->data()->get_string() << std::endl;
-        value = out_vals->val(1);
-        std::cout << value->xpath();
-        std::cout << "= " << value->data()->get_string() << std::endl;
 
 
         return true;
@@ -177,13 +179,7 @@ bool NetConfAgent::subscribeForRpc(const std::string& s_xpath)
 bool NetConfAgent::notifySysrepo(const std::string& module_name) 
 {
     try {
-        auto in_vals = std::make_shared<sysrepo::Vals>(1);
-
-        in_vals->val(0)->set("/mobile-network:core/subscribers[number='+380977777777']/state", "idle" , SR_STRING_T);
-        // in_vals->val(1)->set("/mobile-network:core/subscribers[number='+380977777777']/state", "some-other-value", SR_STRING_T);
-
-        _s_sess->event_notif_send("/mobile-network:core", in_vals);
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        
         
         return true;
     } catch (const std::exception& e) {

@@ -54,7 +54,7 @@ public:
     bool registerOperData(const std::string&, const std::string&, const std::string&);
 
     /* */
-    bool subscribeForRpc(const std::string&);
+    bool subscribeForRpc(const std::string&, const size_t&, const std::map<std::string, std::string>&);
 
     /* */
     bool notifySysrepo(const std::string&);
