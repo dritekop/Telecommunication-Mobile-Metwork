@@ -2,22 +2,14 @@
 
 #define MAX_LEN 100
 
-volatile int exit_application = 0;
-
-static void
-sigint_handler(int signum)
-{
-    exit_application = 1;
-}
-
 namespace netconfag {
 
 bool NetConfAgent::initSysrepo() 
 {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
     try {
         _s_conn = std::make_shared<sysrepo::Connection>();
         _s_sess = std::make_shared<sysrepo::Session>(_s_conn);
+        _s_sub = std::make_shared<sysrepo::Subscribe>(_s_sess);
         return true;
     } catch (const std::exception& e) {
         std::cout << "Error. Try to start server.\n";
@@ -27,7 +19,6 @@ bool NetConfAgent::initSysrepo()
 }
 
 bool NetConfAgent::closeSys() {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
     try {
         _s_sess->session_stop();
         return true;
@@ -37,11 +28,13 @@ bool NetConfAgent::closeSys() {
     }
 }
 
-bool NetConfAgent::fetchData(const std::string& s_xpath, std::string& value) 
+bool NetConfAgent::fetchData(std::map<std::string, std::string>& s_xpath_and_value) 
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
     try {
-        value = _s_sess->get_item(s_xpath.c_str())->val_to_string();
+        for (auto item : s_xpath_and_value) {
+            item.second = _s_sess->get_item(item.first.c_str())->val_to_string();
+        }
         return true;
     } catch (const std::exception& e) {
         std::cout << e.what() << std::endl;
@@ -52,30 +45,20 @@ bool NetConfAgent::fetchData(const std::string& s_xpath, std::string& value)
 bool NetConfAgent::subscribeForModelChanges(const std::string& s_module_name) 
 {
     try {
-        auto sub = std::make_shared<sysrepo::Subscribe>(_s_sess);
-
         auto subscribe = [] (sysrepo::S_Session session, const char* module_name, const char* xpath,\
             sr_event_t event, uint32_t request_id) {
-            //some work is done here
+            
             char change_path[MAX_LEN];
             snprintf(change_path, MAX_LEN, "/%s:*//.", module_name);
             auto it = session->get_changes_iter(change_path);
-            // while (auto change = session->get_change_next(it))
             auto change = session->get_change_next(it);
-                std::cout << change->new_val()->to_string();
+            std::cout << change->new_val()->to_string();
             return SR_ERR_OK;
         };
-
-        sub->module_change_subscribe(s_module_name.c_str(), subscribe);
         
-        /* loop until ctrl-c is pressed / SIGINT is received 
-        */
-        signal(SIGINT, sigint_handler);
-        while (!exit_application) {
+        _s_sub->module_change_subscribe(s_module_name.c_str(), subscribe);
 
-        }
         return true;
-
     } catch (const std::exception& e) {
         std::cout << e.what() << std::endl;
         return false;
@@ -85,7 +68,6 @@ bool NetConfAgent::subscribeForModelChanges(const std::string& s_module_name)
 bool NetConfAgent::registerOperData(const std::string& module_name, const std::string& xpath, const std::string& oper_value) 
 {
     try {
-        auto subscribe = std::make_shared<sysrepo::Subscribe>(_s_sess);
         std::string sub_path = xpath;
         sub_path.erase(sub_path.rfind("/"));
         std::cout << sub_path << std::endl;
@@ -101,15 +83,8 @@ bool NetConfAgent::registerOperData(const std::string& module_name, const std::s
             return SR_ERR_OK;
         };
 
-        subscribe->oper_get_items_subscribe(module_name.c_str(), cb, sub_path.c_str());
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        _s_sub->oper_get_items_subscribe(module_name.c_str(), cb, sub_path.c_str());
 
-        /* loop until ctrl-c is pressed / SIGINT is received 
-        */
-        signal(SIGINT, sigint_handler);
-        while (!exit_application) {
-
-        }
         return true;
     } catch (const std::exception& e) {
         std::cout << e.what() << " WHATAFUCK!!!!" << std::endl;        
@@ -121,7 +96,6 @@ bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amo
 {
     std::cout << std::endl << __PRETTY_FUNCTION__ << std::endl;
     try {
-        auto subscribe = std::make_shared<sysrepo::Subscribe>(_s_sess);
         auto cbVals = [s_xpath, amount, leaf_name_value](sysrepo::S_Session session, const char* op_path, const sysrepo::S_Vals input,\
             sr_event_t event, uint32_t request_id, sysrepo::S_Vals_Holder output) {
             std::cout << "\n ========== RPC CALLED ==========\n" << std::endl;
@@ -161,14 +135,7 @@ bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amo
         };
 
         std::cout << "\n ========== SUBSCRIBE TO RPC CALL ==========\n" << std::endl;
-        subscribe->rpc_subscribe(s_xpath.c_str(), cbVals, 1);
-
-        auto in_vals = std::make_shared<sysrepo::Vals>(1);
-
-        in_vals->val(0)->set("/MOBILENETWORK:something/what_does_this_do", "AND", SR_ENUM_T);       
-
-        std::cout << "\n ========== START RPC CALL FROM THE METHOD. SHOULD BE CHANGED ==========\n" << std::endl;
-        auto out_vals = _s_sess->rpc_send("/MOBILENETWORK:something", in_vals);
+        _s_sub->rpc_subscribe(s_xpath.c_str(), cbVals, 1);
 
         return true;
     } catch (const std::exception& e) {
@@ -180,8 +147,20 @@ bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amo
 bool NetConfAgent::notifySysrepo(const std::string& module_name) 
 {
     try {
-        
-        
+        auto cbVals = [] (sysrepo::S_Session session, const sr_ev_notif_type_t notif_type, const char *path,
+            const sysrepo::S_Vals vals, time_t timestamp) {
+            std::cout << "\n ========== NOTIF RECEIVED ==========\n" << std::endl;
+
+            for(size_t n = 0; n < vals->val_cnt(); ++n) {
+                auto value = vals->val(n);
+                std::cout << value->xpath();
+                std::cout << " = " << value->data()->get_string() << std::endl;
+            }
+        };
+
+        std::cout << "\n ========== SUBSCRIBE TO NOTIF ==========\n" << std::endl;
+        _s_sub->event_notif_subscribe(module_name.c_str(), cbVals);
+
         return true;
     } catch (const std::exception& e) {
         std::cout << e.what() << std::endl;

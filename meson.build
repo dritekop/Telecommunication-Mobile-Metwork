@@ -1,13 +1,13 @@
 project('mobnet', 'cpp',
-    default_options : ['cpp_std=c++17', '-libagent'])
+    default_options : ['cpp_std=c++17'])
 
 subdir('source')
 
 sysrepo_dep = dependency('sysrepo-cpp')
 libyang_dep = dependency('libyang-cpp')
+thread = dependency('threads')
 
 executable('user_node',
     sources : 'main.cpp',
-    dependencies : [net_conf_ag_dep, sysrepo_dep, libyang_dep]
+    dependencies : [net_conf_ag_dep, sysrepo_dep, libyang_dep, thread],
 )
-

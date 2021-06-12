@@ -5,6 +5,7 @@
 #include <functional>
 #include <stdexcept>
 #include <regex>
+#include <thread>
 
 #include <NetConfAgent.hpp>
 
@@ -54,23 +55,35 @@ int main()
 
     user->initSysrepo();
 
-    user->changeData("/mobile-network:core/subscribers[number='001']/state", "idle");
-
-    user->registerOperData("mobile-network", "/mobile-network:core/subscribers[number='+380977777777']/userName", "Bob");
-
+    std::string module = "/MOBILENETWORK:something";
+    size_t amount = 2;
     std::map<std::string, std::string> names = {
         {"incomingNumber", "001"},
         {"state", "active"},
     };
-    user->subscribeForRpc("/MOBILENETWORK:something", 2, names);
+
+    // std::thread sub_for_rpc(&netconfag::NetConfAgent::subscribeForRpc, user.get(), module, amount, names);
+    
+    std::thread reg_op_data(&netconfag::NetConfAgent::registerOperData, user.get(),
+        "mobile-network", "/mobile-network:core/subscribers[number='+380977777777']/userName", "Bob");
+
+    std::thread sub_model_changes(&netconfag::NetConfAgent::subscribeForModelChanges, user.get(),
+        "mobile-network");
+
+    // std::thread notif(&netconfag::NetConfAgent::notifySysrepo, user.get(), "MOBILENETWORK");
+
+    while(true) 
+    {
+        std::getline(std::cin, input_line);
+        action_detect(input_line, user);
+    }
+    
+    // sub_for_rpc.join();
+    reg_op_data.join();
+    sub_model_changes.join();
+    // notif.join();
 
     user->closeSys();
-
-    // while(true) 
-    // {
-    //     std::getline(std::cin, input_line);
-    //     action_detect(input_line, user);
-    // }
 }
 
 void f_register(const std::vector<std::string>& line_tokens, std::unique_ptr<netconfag::NetConfAgent>& user) 
