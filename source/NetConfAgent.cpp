@@ -34,6 +34,7 @@ bool NetConfAgent::fetchData(std::map<std::string, std::string>& s_xpath_and_val
     try {
         for (auto item : s_xpath_and_value) {
             item.second = _s_sess->get_item(item.first.c_str())->val_to_string();
+            s_xpath_and_value[item.first] = item.second;
         }
         return true;
     } catch (const std::exception& e) {

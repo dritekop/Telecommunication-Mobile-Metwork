@@ -62,7 +62,7 @@ int main()
         {"state", "active"},
     };
 
-    // std::thread sub_for_rpc(&netconfag::NetConfAgent::subscribeForRpc, user.get(), module, amount, names);
+    std::thread sub_for_rpc(&netconfag::NetConfAgent::subscribeForRpc, user.get(), module, amount, names);
     
     std::thread reg_op_data(&netconfag::NetConfAgent::registerOperData, user.get(),
         "mobile-network", "/mobile-network:core/subscribers[number='+380977777777']/userName", "Bob");
@@ -72,13 +72,21 @@ int main()
 
     // std::thread notif(&netconfag::NetConfAgent::notifySysrepo, user.get(), "MOBILENETWORK");
 
+    std::string x = "/mobile-network:core/subscribers[number='+380966666666']/state";
+    std::string y;
+    std::map<std::string, std::string> data_to_fetch = {
+        {x , y},
+    };
+    user->fetchData(data_to_fetch);
+    std::cout << data_to_fetch[x] << std::endl;
+
     while(true) 
     {
         std::getline(std::cin, input_line);
         action_detect(input_line, user);
     }
     
-    // sub_for_rpc.join();
+    sub_for_rpc.join();
     reg_op_data.join();
     sub_model_changes.join();
     // notif.join();
