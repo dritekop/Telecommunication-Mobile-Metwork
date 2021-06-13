@@ -71,7 +71,9 @@ public:
     /*
     *@breaf passed module will send nitofications if it is needed
     *
-    *@param module_name The string where is stored name of the module that should send notifications
+    *@param s_xpath The string where are stored names of the module and of the notif-node that should send notifications
+    * s_leaf_value The map where the key is the string marking the leaf's name and 
+    *              the value is the string marking the value of the notification's leaf
     *
     *@return true if ok, otherwise false
     */
