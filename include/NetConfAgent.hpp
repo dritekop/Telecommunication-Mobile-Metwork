@@ -75,7 +75,7 @@ public:
     *
     *@return true if ok, otherwise false
     */
-    bool notifySysrepo(const std::string& module_name);
+    bool notifySysrepo(const std::string& s_xpath, const std::map<std::string, std::string>& s_leaf_value);
 
     /*    
     *@breaf sets data for leaf of the model instance

@@ -53,7 +53,8 @@ int main()
     std::string input_line;
     auto user = std::make_unique<netconfag::NetConfAgent>();
 
-    user->initSysrepo();
+    if (!user->initSysrepo())
+        std::exit(EXIT_FAILURE);
 
     std::string module = "/MOBILENETWORK:something";
     size_t amount = 2;
@@ -70,15 +71,25 @@ int main()
     std::thread sub_model_changes(&netconfag::NetConfAgent::subscribeForModelChanges, user.get(),
         "mobile-network");
 
-    // std::thread notif(&netconfag::NetConfAgent::notifySysrepo, user.get(), "MOBILENETWORK");
-
     std::string x = "/mobile-network:core/subscribers[number='+380966666666']/state";
     std::string y;
-    std::map<std::string, std::string> data_to_fetch = {
+    std::map<std::string, std::string> map_to_fetch = {
         {x , y},
     };
-    user->fetchData(data_to_fetch);
-    std::cout << data_to_fetch[x] << std::endl;
+    user->fetchData(map_to_fetch);
+    std::cout << map_to_fetch[x] << std::endl;
+
+    
+    std::string x1 = "val1";
+    std::string x2 = "val2";
+    std::string y1 = "VAL1";
+    std::string y2 = "VAL2";
+    std::map<std::string, std::string> map_to_notify = {
+        {x1 , y1},
+        {x2, y2}
+    };
+    if (user->notifySysrepo("/MOBILENETWORK:test-notif", map_to_notify))
+        std::cout << "Notification is sent\n";
 
     while(true) 
     {
@@ -89,7 +100,6 @@ int main()
     sub_for_rpc.join();
     reg_op_data.join();
     sub_model_changes.join();
-    // notif.join();
 
     user->closeSys();
 }

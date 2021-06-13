@@ -30,7 +30,6 @@ bool NetConfAgent::closeSys() {
 
 bool NetConfAgent::fetchData(std::map<std::string, std::string>& s_xpath_and_value) 
 {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
     try {
         for (auto item : s_xpath_and_value) {
             item.second = _s_sess->get_item(item.first.c_str())->val_to_string();
@@ -71,7 +70,6 @@ bool NetConfAgent::registerOperData(const std::string& module_name, const std::s
     try {
         std::string sub_path = xpath;
         sub_path.erase(sub_path.rfind("/"));
-        std::cout << sub_path << std::endl;
         
         auto cb = [xpath, oper_value] (sysrepo::S_Session session, const char *module_name, const char *path, const char *request_xpath,
             uint32_t request_id, libyang::S_Data_Node &parent) {
@@ -79,7 +77,7 @@ bool NetConfAgent::registerOperData(const std::string& module_name, const std::s
             libyang::S_Module mod = ctx->get_module(module_name);
 
             parent->new_path(ctx, xpath.c_str(), oper_value.c_str(), LYD_ANYDATA_CONSTSTRING, 0);
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
+            std::cout << "Look at the operdata in the netopeer2-cli\n";
 
             return SR_ERR_OK;
         };
@@ -88,14 +86,13 @@ bool NetConfAgent::registerOperData(const std::string& module_name, const std::s
 
         return true;
     } catch (const std::exception& e) {
-        std::cout << e.what() << " WHATAFUCK!!!!" << std::endl;        
+        std::cout << e.what() << std::endl;        
         return false;
     }
 }
 
 bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amount, const std::map<std::string, std::string>& leaf_name_value) 
 {
-    std::cout << std::endl << __PRETTY_FUNCTION__ << std::endl;
     try {
         auto cbVals = [s_xpath, amount, leaf_name_value](sysrepo::S_Session session, const char* op_path, const sysrepo::S_Vals input,\
             sr_event_t event, uint32_t request_id, sysrepo::S_Vals_Holder output) {
@@ -145,22 +142,19 @@ bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amo
     }
 }
 
-bool NetConfAgent::notifySysrepo(const std::string& module_name) 
+bool NetConfAgent::notifySysrepo(const std::string& s_xpath, const std::map<std::string, std::string>& s_leaf_value) 
 {
     try {
-        auto cbVals = [] (sysrepo::S_Session session, const sr_ev_notif_type_t notif_type, const char *path,
-            const sysrepo::S_Vals vals, time_t timestamp) {
-            std::cout << "\n ========== NOTIF RECEIVED ==========\n" << std::endl;
+        auto in_vals = std::make_shared<sysrepo::Vals>(s_leaf_value.size());
 
-            for(size_t n = 0; n < vals->val_cnt(); ++n) {
-                auto value = vals->val(n);
-                std::cout << value->xpath();
-                std::cout << " = " << value->data()->get_string() << std::endl;
-            }
-        };
+        size_t i = 0;
+        for (auto item : s_leaf_value) {
+            std::string set_xpath = s_xpath + "/" + item.first;
+            in_vals->val(i)->set(set_xpath.c_str(), item.second.c_str(), SR_STRING_T);
+            ++i;
+        }
 
-        std::cout << "\n ========== SUBSCRIBE TO NOTIF ==========\n" << std::endl;
-        _s_sub->event_notif_subscribe(module_name.c_str(), cbVals);
+        _s_sess->event_notif_send(s_xpath.c_str(), in_vals);
 
         return true;
     } catch (const std::exception& e) {
