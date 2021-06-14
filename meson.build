@@ -9,5 +9,5 @@ thread = dependency('threads')
 
 executable('user_node',
     sources : 'main.cpp',
-    dependencies : [net_conf_ag_dep, sysrepo_dep, libyang_dep, thread],
+    dependencies : [mob_client_dep, sysrepo_dep, libyang_dep, thread],
 )

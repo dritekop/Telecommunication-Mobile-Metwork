@@ -8,7 +8,6 @@
 
 #include <sysrepo-cpp/Session.hpp>
 #include <sysrepo-cpp/Connection.hpp>
-// #include <libyang/Libyang.hpp>
 
 namespace netconfag {
 
