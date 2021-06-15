@@ -42,15 +42,14 @@ bool NetConfAgent::fetchData(std::map<std::string, std::string>& s_xpath_and_val
     }
 }
 
-bool NetConfAgent::subscribeForModelChanges(const std::string& s_module_name) 
+bool NetConfAgent::subscribeForModelChanges(const std::string& s_module_name, const std::string& number) 
 {
     try {
-        auto subscribe = [] (sysrepo::S_Session session, const char* module_name, const char* xpath,\
+        auto subscribe = [s_module_name, number] (sysrepo::S_Session session, const char* module_name, const char* xpath,\
             sr_event_t event, uint32_t request_id) {
-            
-            char change_path[MAX_LEN];
-            snprintf(change_path, MAX_LEN, "/%s:*//.", module_name);
-            auto it = session->get_changes_iter(change_path);
+            std::string leaf_xpath = "/" + s_module_name + ":core/subscribers[number='" + number + "']/state";
+            std::cout << __PRETTY_FUNCTION__ << std::endl;
+            auto it = session->get_changes_iter(leaf_xpath.c_str());
             auto change = session->get_change_next(it);
             std::cout << change->new_val()->to_string();
             return SR_ERR_OK;
@@ -165,11 +164,10 @@ bool NetConfAgent::notifySysrepo(const std::string& s_xpath, const std::map<std:
 
 bool NetConfAgent::changeData(const std::string& s_xpath, const std::string& value) 
 {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
     try {
         _s_sess->set_item_str(s_xpath.c_str(), value.c_str());
         _s_sess->apply_changes();
-        
+
         return true;
     } catch (const std::exception& e) {
         std::cout << e.what() << std::endl; 

@@ -73,9 +73,9 @@ void f_register(const std::vector<std::string>& line_tokens, std::unique_ptr<mob
     std::regex num_regex("\\+380([0-9]{9})");
 
     if (std::regex_match(number,num_regex)) {
-        std::cout << number << std::endl;
-        user->registerClient(number);
-        ::exit_handler = true;
+        if (user->registerClient(number))
+            ::exit_handler = true;
+        std::cout << "Subscriber was succesfully registered\n";
     } 
     else {
         std::cout << "Number should have format +380XXXXXXXXX\n";
@@ -89,7 +89,10 @@ void f_unregister(const std::vector<std::string>& line_tokens, std::unique_ptr<m
         return;
     }
 
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    if (::exit_handler)
+        ::exit_handler = false;
+    else
+        std::exit(EXIT_FAILURE);
 }
 
 void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<mobileclient::MobileClient>& user) 
@@ -99,12 +102,15 @@ void f_call(const std::vector<std::string>& line_tokens, std::unique_ptr<mobilec
         return;
     }
 
+    if (!::exit_handler)
+        std::exit(EXIT_FAILURE);
+
     std::string number = line_tokens.at(::SECOND_WORD);
     std::regex num_regex("\\+380([0-9]{9})");
 
     if (std::regex_match(number, num_regex)) {
         try {
-            std::cout << number << std::endl;
+            user->call(number);
         } catch (const std::exception& e) {
             std::cout << "Invalid number.\n";
         } 

@@ -38,11 +38,12 @@ public:
     /*    
     *@breaf print changes in the module
     *
-    *@param module_name The string names the module to which be subscribed
+    *@param s_xpath The string shows module where changes should be monitored
+    * number The string to complete s_xpath correctly
     *
     *@returns true if ok, otherwise false
     */
-    bool subscribeForModelChanges(const std::string& s_module_name);
+    bool subscribeForModelChanges(const std::string& s_module_name, const std::string& number);
 
     /*    
     *@breaf register operational data and sets value to the noconfig leaf
