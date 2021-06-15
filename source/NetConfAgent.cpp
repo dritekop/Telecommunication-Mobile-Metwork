@@ -1,4 +1,5 @@
 #include <NetConfAgent.hpp>
+#include <MobileClient.hpp>
 
 #define MAX_LEN 100
 
@@ -28,12 +29,12 @@ bool NetConfAgent::closeSys() {
     }
 }
 
-bool NetConfAgent::fetchData(std::map<std::string, std::string>& s_xpath_and_value) 
+bool NetConfAgent::fetchData(std::map<std::string, std::string>& sXpathAndValue) 
 {
     try {
-        for (auto item : s_xpath_and_value) {
+        for (auto item : sXpathAndValue) {
             item.second = _s_sess->get_item(item.first.c_str())->val_to_string();
-            s_xpath_and_value[item.first] = item.second;
+            sXpathAndValue[item.first] = item.second;
         }
         return true;
     } catch (const std::exception& e) {
@@ -42,20 +43,19 @@ bool NetConfAgent::fetchData(std::map<std::string, std::string>& s_xpath_and_val
     }
 }
 
-bool NetConfAgent::subscribeForModelChanges(const std::string& s_module_name, const std::string& number) 
+bool NetConfAgent::subscribeForModelChanges(const std::string& sModuleName, const std::string& number) 
 {
     try {
-        auto subscribe = [s_module_name, number] (sysrepo::S_Session session, const char* module_name, const char* xpath,\
+        auto subscribe = [sModuleName, number] (sysrepo::S_Session session, const char* module_name, const char* xpath,\
             sr_event_t event, uint32_t request_id) {
-            std::string leaf_xpath = "/" + s_module_name + ":core/subscribers[number='" + number + "']/state";
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
-            auto it = session->get_changes_iter(leaf_xpath.c_str());
+            std::string leafXpath = "/" + sModuleName + ":core/subscribers[number='" + number + "']/state";
+            auto it = session->get_changes_iter(leafXpath.c_str());
             auto change = session->get_change_next(it);
             std::cout << change->new_val()->to_string();
             return SR_ERR_OK;
         };
         
-        _s_sub->module_change_subscribe(s_module_name.c_str(), subscribe);
+        _s_sub->module_change_subscribe(sModuleName.c_str(), subscribe);
 
         return true;
     } catch (const std::exception& e) {
@@ -64,24 +64,26 @@ bool NetConfAgent::subscribeForModelChanges(const std::string& s_module_name, co
     }
 }
 
-bool NetConfAgent::registerOperData(const std::string& module_name, const std::string& xpath, const std::string& oper_value) 
+bool NetConfAgent::registerOperData(const std::string& moduleName, mobileclient::MobileClient* ptrUser) 
 {
     try {
-        std::string sub_path = xpath;
-        sub_path.erase(sub_path.rfind("/"));
+        std::string xpath;
+        std::string operValue;
+        ptrUser->handleOperData(xpath, operValue);
+        std::string subPath = xpath;
+        subPath.erase(subPath.rfind("/"));
         
-        auto cb = [xpath, oper_value] (sysrepo::S_Session session, const char *module_name, const char *path, const char *request_xpath,
+        auto cb = [xpath, operValue] (sysrepo::S_Session session, const char *module_name, const char *path, const char *request_xpath,
             uint32_t request_id, libyang::S_Data_Node &parent) {
             libyang::S_Context ctx = session->get_context();
             libyang::S_Module mod = ctx->get_module(module_name);
 
-            parent->new_path(ctx, xpath.c_str(), oper_value.c_str(), LYD_ANYDATA_CONSTSTRING, 0);
-            std::cout << "Look at the operdata in the netopeer2-cli\n";
+            parent->new_path(ctx, xpath.c_str(), operValue.c_str(), LYD_ANYDATA_CONSTSTRING, 0);
 
             return SR_ERR_OK;
         };
 
-        _s_sub->oper_get_items_subscribe(module_name.c_str(), cb, sub_path.c_str());
+        _s_sub->oper_get_items_subscribe(moduleName.c_str(), cb, subPath.c_str());
 
         return true;
     } catch (const std::exception& e) {
@@ -90,10 +92,10 @@ bool NetConfAgent::registerOperData(const std::string& module_name, const std::s
     }
 }
 
-bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amount, const std::map<std::string, std::string>& leaf_name_value) 
+bool NetConfAgent::subscribeForRpc(const std::string& sXpath, const size_t& amount, const std::map<std::string, std::string>& leafNameValue) 
 {
     try {
-        auto cbVals = [s_xpath, amount, leaf_name_value](sysrepo::S_Session session, const char* op_path, const sysrepo::S_Vals input,\
+        auto cbVals = [sXpath, amount, leafNameValue](sysrepo::S_Session session, const char* op_path, const sysrepo::S_Vals input,\
             sr_event_t event, uint32_t request_id, sysrepo::S_Vals_Holder output) {
             std::cout << "\n ========== RPC CALLED ==========\n" << std::endl;
 
@@ -108,17 +110,15 @@ bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amo
             /* 
             the structure of the code below matches to the yang model MOBILENETWORK.
             */
-            std::map<std::string,std::string>::const_iterator it = leaf_name_value.begin();
-            std::pair<std::string, std::string> name_value = *it;
-            std::string name = s_xpath + "/" + name_value.first;
-            std::cout << name << std::endl;
-            out_vals->val(0)->set(name.c_str(), name_value.second.c_str(), SR_STRING_T);
+            std::map<std::string,std::string>::const_iterator it = leafNameValue.begin();
+            std::pair<std::string, std::string> nameValue = *it;
+            std::string name = sXpath + "/" + nameValue.first;
+            out_vals->val(0)->set(name.c_str(), nameValue.second.c_str(), SR_STRING_T);
 
             ++it;
-            name_value = *it;
-            name = s_xpath + "/" + name_value.first;
-            std::cout << name << std::endl;
-            out_vals->val(1)->set(name.c_str(), name_value.second.c_str(), SR_ENUM_T);
+            nameValue = *it;
+            name = sXpath + "/" + nameValue.first;
+            out_vals->val(1)->set(name.c_str(), nameValue.second.c_str(), SR_ENUM_T);
 
             std::cout << "\n ========== PRINT RETURN VALUE ==========\n" << std::endl;
             auto value = out_vals->val(0);
@@ -132,7 +132,7 @@ bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amo
         };
 
         std::cout << "\n ========== SUBSCRIBE TO RPC CALL ==========\n" << std::endl;
-        _s_sub->rpc_subscribe(s_xpath.c_str(), cbVals, 1);
+        _s_sub->rpc_subscribe(sXpath.c_str(), cbVals, 1);
 
         return true;
     } catch (const std::exception& e) {
@@ -141,19 +141,19 @@ bool NetConfAgent::subscribeForRpc(const std::string& s_xpath, const size_t& amo
     }
 }
 
-bool NetConfAgent::notifySysrepo(const std::string& s_xpath, const std::map<std::string, std::string>& s_leaf_value) 
+bool NetConfAgent::notifySysrepo(const std::string& sXpath, const std::map<std::string, std::string>& sLeafValue) 
 {
     try {
-        auto in_vals = std::make_shared<sysrepo::Vals>(s_leaf_value.size());
+        auto in_vals = std::make_shared<sysrepo::Vals>(sLeafValue.size());
 
         size_t i = 0;
-        for (auto item : s_leaf_value) {
-            std::string set_xpath = s_xpath + "/" + item.first;
-            in_vals->val(i)->set(set_xpath.c_str(), item.second.c_str(), SR_STRING_T);
+        for (auto item : sLeafValue) {
+            std::string setXpath = sXpath + "/" + item.first;
+            in_vals->val(i)->set(setXpath.c_str(), item.second.c_str(), SR_STRING_T);
             ++i;
         }
 
-        _s_sess->event_notif_send(s_xpath.c_str(), in_vals);
+        _s_sess->event_notif_send(sXpath.c_str(), in_vals);
 
         return true;
     } catch (const std::exception& e) {
@@ -162,10 +162,10 @@ bool NetConfAgent::notifySysrepo(const std::string& s_xpath, const std::map<std:
     }
 }
 
-bool NetConfAgent::changeData(const std::string& s_xpath, const std::string& value) 
+bool NetConfAgent::changeData(const std::string& sXpath, const std::string& value) 
 {
     try {
-        _s_sess->set_item_str(s_xpath.c_str(), value.c_str());
+        _s_sess->set_item_str(sXpath.c_str(), value.c_str());
         _s_sess->apply_changes();
 
         return true;

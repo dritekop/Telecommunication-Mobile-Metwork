@@ -9,6 +9,10 @@
 #include <sysrepo-cpp/Session.hpp>
 #include <sysrepo-cpp/Connection.hpp>
 
+namespace mobileclient {
+    class MobileClient;
+};
+
 namespace netconfag {
 
 class NetConfAgent {
@@ -33,7 +37,7 @@ public:
     *
     *@returns true if ok, otherwise false
     */
-    bool fetchData(std::map<std::string, std::string>& s_xpath_and_value);
+    bool fetchData(std::map<std::string, std::string>& sXpathAndValue);
 
     /*    
     *@breaf print changes in the module
@@ -43,18 +47,17 @@ public:
     *
     *@returns true if ok, otherwise false
     */
-    bool subscribeForModelChanges(const std::string& s_module_name, const std::string& number);
+    bool subscribeForModelChanges(const std::string& sModuleName, const std::string& number);
 
     /*    
     *@breaf register operational data and sets value to the noconfig leaf
     *
     *@param module_name The string names module where is located noconfig leaf, 
-    * xpath The string where is stored xpath to this leaf, 
-    * oper_value The string where is stored data to be assigned to the operational data 
+    * user  
     *
     *@return true if ok, otherwise false
     */
-    bool registerOperData(const std::string& module_name, const std::string& xpath, const std::string& oper_value);
+    bool registerOperData(const std::string& moduleName, mobileclient::MobileClient* ptrUser);
 
     /*    
     *@breaf indicates sent rpc
@@ -66,7 +69,7 @@ public:
     *
     *@returns true if ok, otherwise false
     */
-    bool subscribeForRpc(const std::string& s_xpath, const size_t& amount, const std::map<std::string, std::string>& leaf_name_value);
+    bool subscribeForRpc(const std::string& sXpath, const size_t& amount, const std::map<std::string, std::string>& leafNameValue);
 
     /*
     *@breaf passed module will send nitofications if it is needed
@@ -77,7 +80,7 @@ public:
     *
     *@return true if ok, otherwise false
     */
-    bool notifySysrepo(const std::string& s_xpath, const std::map<std::string, std::string>& s_leaf_value);
+    bool notifySysrepo(const std::string& sXpath, const std::map<std::string, std::string>& sLeafValue);
 
     /*    
     *@breaf sets data for leaf of the model instance
@@ -86,7 +89,7 @@ public:
     *
     *@return true if ok, otherwise false
     */
-    bool changeData(const std::string& s_xpath, const std::string& value);
+    bool changeData(const std::string& sXpath, const std::string& value);
 
 private:
     sysrepo::S_Connection _s_conn;
