@@ -53,7 +53,7 @@ public:
     *@breaf register operational data and sets value to the noconfig leaf
     *
     *@param module_name The string names module where is located noconfig leaf, 
-    * user  
+    * ptrUser The pointer to the user-defined class in order to call its method  
     *
     *@return true if ok, otherwise false
     */
