@@ -48,16 +48,7 @@ bool NetConfAgent::subscribeForModelChanges(const mobileclient::MobileClient& re
     try {
         auto subscribe = [&refUser] (sysrepo::S_Session session, const char* module_name, const char* xpath,\
             sr_event_t event, uint32_t request_id) {
-            if (SR_EV_CHANGE == event) {
-                if (refUser.getCallInitializer()) {
-                    std::cout << "Waiting for answer...\n";
-                    return SR_ERR_OK;
-                }
-                else {
-                    std::cout << "Incoming call. Answer or reject?\n";
-                    return SR_ERR_OK;
-                }
-            }
+            refUser.handleModuleChange();
             return SR_ERR_OK;
         };
         

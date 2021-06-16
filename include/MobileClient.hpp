@@ -15,6 +15,12 @@ public:
 
     void answer();
 
+    void reject();
+
+    void callEnd();
+
+    void handleModuleChange() const;
+
     void handleOperData(std::string& xpath, std::string& operValue) const;
 
     bool getCallInitializer() const;
@@ -32,6 +38,8 @@ private:
     std::string _name;
     std::string _number;
     std::string _xpathState;
+    std::string _xpathIncomingNumber;
+    std::string _xpathUserName;
     const std::string _moduleName = "mobile-network";
     std::unique_ptr<netconfag::NetConfAgent> _agent;
 };

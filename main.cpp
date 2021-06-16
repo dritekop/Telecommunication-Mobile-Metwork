@@ -161,7 +161,7 @@ void funReject(const std::vector<std::string>& lineTokens, std::unique_ptr<mobil
         return;
     }
 
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    user->reject();
 }
 
 void funCallEnd(const std::vector<std::string>& lineTokens, std::unique_ptr<mobileclient::MobileClient>& user) 
@@ -171,7 +171,7 @@ void funCallEnd(const std::vector<std::string>& lineTokens, std::unique_ptr<mobi
         return;
     }
 
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    user->callEnd();
 }
 
 void funExit(const std::vector<std::string>& lineTokens, std::unique_ptr<mobileclient::MobileClient>& user) 
