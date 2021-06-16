@@ -43,20 +43,25 @@ bool NetConfAgent::fetchData(std::map<std::string, std::string>& sXpathAndValue)
     }
 }
 
-bool NetConfAgent::subscribeForModelChanges(const std::string& sModuleName, const std::string& number) 
+bool NetConfAgent::subscribeForModelChanges(const mobileclient::MobileClient& refUser)
 {
     try {
-        auto subscribe = [sModuleName, number] (sysrepo::S_Session session, const char* module_name, const char* xpath,\
+        auto subscribe = [&refUser] (sysrepo::S_Session session, const char* module_name, const char* xpath,\
             sr_event_t event, uint32_t request_id) {
-            std::string leafXpath = "/" + sModuleName + ":core/subscribers[number='" + number + "']/state";
-            auto it = session->get_changes_iter(leafXpath.c_str());
-            auto change = session->get_change_next(it);
-            std::cout << change->new_val()->to_string();
+            if (SR_EV_CHANGE == event) {
+                if (refUser.getCallInitializer()) {
+                    std::cout << "Waiting for answer...\n";
+                    return SR_ERR_OK;
+                }
+                else {
+                    std::cout << "Incoming call. Answer or reject?\n";
+                    return SR_ERR_OK;
+                }
+            }
             return SR_ERR_OK;
         };
         
-        std::string leafXpath = "/" + sModuleName + ":core/subscribers[number='" + number + "']/state";
-        _s_sub->module_change_subscribe(sModuleName.c_str(), subscribe, leafXpath.c_str());
+        _s_sub->module_change_subscribe(refUser.getModuleName().c_str(), subscribe, refUser.getXpathState().c_str());
 
         return true;
     } catch (const std::exception& e) {
@@ -65,17 +70,15 @@ bool NetConfAgent::subscribeForModelChanges(const std::string& sModuleName, cons
     }
 }
 
-bool NetConfAgent::registerOperData(const std::string& moduleName, mobileclient::MobileClient* ptrUser) 
+bool NetConfAgent::registerOperData(const mobileclient::MobileClient& refUser) 
 {
     try {
-        std::string xpath;
-        std::string operValue;
-        ptrUser->handleOperData(xpath, operValue);
-        std::string subPath = xpath;
-        subPath.erase(subPath.rfind("/"));
-        
-        auto cb = [xpath, operValue] (sysrepo::S_Session session, const char *module_name, const char *path, const char *request_xpath,
+        auto cb = [&refUser] (sysrepo::S_Session session, const char *module_name, const char *path, const char *request_xpath,
             uint32_t request_id, libyang::S_Data_Node &parent) {
+            std::string xpath;
+            std::string operValue;
+            refUser.handleOperData(xpath, operValue);
+
             libyang::S_Context ctx = session->get_context();
             libyang::S_Module mod = ctx->get_module(module_name);
 
@@ -84,7 +87,9 @@ bool NetConfAgent::registerOperData(const std::string& moduleName, mobileclient:
             return SR_ERR_OK;
         };
 
-        _s_sub->oper_get_items_subscribe(moduleName.c_str(), cb, subPath.c_str());
+        std::string subPath = refUser.getXpathState();
+        subPath.erase(subPath.rfind("/"));
+        _s_sub->oper_get_items_subscribe(refUser.getModuleName().c_str(), cb, subPath.c_str());
 
         return true;
     } catch (const std::exception& e) {

@@ -13,11 +13,22 @@ public:
 
     void call(const std::string& incomingNumber);
 
-    void handleOperData(std::string& xpath, std::string& operValue);
+    void answer();
+
+    void handleOperData(std::string& xpath, std::string& operValue) const;
+
+    bool getCallInitializer() const;
+
+    std::string getXpathState() const;
+
+    std::string getModuleName() const;
+
+    std::string getNumber() const;
 
     void stopClient();
 
 private:
+    bool _callInitializer = false;
     std::string _name;
     std::string _number;
     std::string _xpathState;

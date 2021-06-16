@@ -151,7 +151,7 @@ void funAnswer(const std::vector<std::string>& lineTokens, std::unique_ptr<mobil
         return;
     }
 
-    std::cout << __PRETTY_FUNCTION__ << std::endl;    
+    user->answer();  
 }
 
 void funReject(const std::vector<std::string>& lineTokens, std::unique_ptr<mobileclient::MobileClient>& user) 

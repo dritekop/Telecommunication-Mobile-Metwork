@@ -47,7 +47,7 @@ public:
     *
     *@returns true if ok, otherwise false
     */
-    bool subscribeForModelChanges(const std::string& sModuleName, const std::string& number);
+    bool subscribeForModelChanges(const mobileclient::MobileClient& refUser);
 
     /*    
     *@breaf register operational data and sets value to the noconfig leaf
@@ -57,7 +57,7 @@ public:
     *
     *@return true if ok, otherwise false
     */
-    bool registerOperData(const std::string& moduleName, mobileclient::MobileClient* ptrUser);
+    bool registerOperData(const mobileclient::MobileClient& refUser);
 
     /*    
     *@breaf indicates sent rpc
