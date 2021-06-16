@@ -17,7 +17,7 @@ namespace mobileclient {
         _agent->initSysrepo();
         _agent->registerOperData(_moduleName, this);
         _agent->changeData(_xpathState, value);
-        // _agent->subscribeForModelChanges("mobile-network", _number);
+        _agent->subscribeForModelChanges(_moduleName, _number);
 
         return true;
     }
@@ -52,8 +52,8 @@ namespace mobileclient {
         _agent->changeData(guestXpathState, "active");
     }
 
-    void MobileClient::handleOperData(std::string& xpath, std::string& oper_value) {
-        oper_value = _name;
+    void MobileClient::handleOperData(std::string& xpath, std::string& operValue) {
+        operValue = _name;
         xpath = "/mobile-network:core/subscribers[number='" + _number + "']/userName";
     }
 

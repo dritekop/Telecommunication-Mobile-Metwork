@@ -55,7 +55,8 @@ bool NetConfAgent::subscribeForModelChanges(const std::string& sModuleName, cons
             return SR_ERR_OK;
         };
         
-        _s_sub->module_change_subscribe(sModuleName.c_str(), subscribe);
+        std::string leafXpath = "/" + sModuleName + ":core/subscribers[number='" + number + "']/state";
+        _s_sub->module_change_subscribe(sModuleName.c_str(), subscribe, leafXpath.c_str());
 
         return true;
     } catch (const std::exception& e) {
