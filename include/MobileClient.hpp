@@ -11,7 +11,7 @@ public:
 
     bool registerClient(const std::string& number);
 
-    void dryMethod(std::string& state, std::string& incomingNumber);
+    void dryMethod(std::string& state, std::string& incomingNumber) const;
 
     void call(const std::string& incomingNumber);
 
@@ -21,17 +21,13 @@ public:
 
     void callEnd();
 
-    void handleModuleChange() const;
+    void handleModuleChange();
 
-    void handleOperData(std::string& xpath, std::string& operValue) const;
-
-    bool getCallInitializer() const;
+    void handleOperData(std::string& xpath, std::string& operValue);
 
     std::string getXpathState() const;
 
     std::string getModuleName() const;
-
-    std::string getNumber() const;
 
     void stopClient();
 

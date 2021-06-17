@@ -38,12 +38,11 @@ bool NetConfAgent::fetchData(std::map<std::string, std::string>& sXpathAndValue)
         }
         return true;
     } catch (const std::exception& e) {
-        std::cout << e.what() << std::endl;
         return false;
     }
 }
 
-bool NetConfAgent::subscribeForModelChanges(const mobileclient::MobileClient& refUser)
+bool NetConfAgent::subscribeForModelChanges(mobileclient::MobileClient& refUser)
 {
     try {
         auto subscribe = [&refUser] (sysrepo::S_Session session, const char* module_name, const char* xpath,\
@@ -62,7 +61,7 @@ bool NetConfAgent::subscribeForModelChanges(const mobileclient::MobileClient& re
     }
 }
 
-bool NetConfAgent::registerOperData(const mobileclient::MobileClient& refUser) 
+bool NetConfAgent::registerOperData(mobileclient::MobileClient& refUser) 
 {
     try {
         auto cb = [&refUser] (sysrepo::S_Session session, const char *module_name, const char *path, const char *request_xpath,

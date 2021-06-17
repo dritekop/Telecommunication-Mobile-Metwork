@@ -5,7 +5,7 @@ namespace mobileclient {
         _name = name;
     }
 
-    void MobileClient::dryMethod(std::string& state, std::string& incomingNumber) {
+    void MobileClient::dryMethod(std::string& state, std::string& incomingNumber) const {
         std::map<std::string, std::string> mapXpathValue = { 
             {_xpathState, state},
             {_xpathIncomingNumber, incomingNumber}
@@ -40,8 +40,13 @@ namespace mobileclient {
             {_xpathState, state}
         };
         _agent->fetchData(testNumber);
-        if (!testNumber[_xpathState].empty())
+        if (!testNumber[_xpathState].empty()) {
+            _number.erase();
+            _xpathState.erase();
+            _xpathIncomingNumber.erase();
+            _xpathUserName.erase();
             return false;
+        }
 
         std::string value = "idle";
         
@@ -137,35 +142,29 @@ namespace mobileclient {
         _agent->changeData(_xpathIncomingNumber, "");
     }
 
-    void MobileClient::handleModuleChange() const {
-        std::string valueState;
-        std::map<std::string, std::string> mapXpathValue = {
-            {_xpathState, valueState}
-        };
-        _agent->fetchData(mapXpathValue);
+    void MobileClient::handleModuleChange() {
+        std::string state;
+        std::string incomingNumber;
+        dryMethod(state, incomingNumber);
 
-        if (_callInitializer && mapXpathValue[_xpathState] == "active") {
+        if (_callInitializer && state == "active") {
             std::cout << "Waiting for answer...\n";
         }
-        else if (!_callInitializer && mapXpathValue[_xpathState] == "active") {
-            std::cout << "Incoming call. Answer or reject?\n";
+        else if (!_callInitializer && state == "active") {
+            std::cout << "Incoming call from " << incomingNumber << ". answer or reject?\n";
         } 
-        else if (mapXpathValue[_xpathState] == "busy") {
-            std::cout << "Talking...\n";
-        } else if (mapXpathValue[_xpathState] == "idle"){
-            std::cout << "Idle\n";
+        else if (state == "busy") {
+            std::cout << "Talking with " << incomingNumber << "...\n";
+        } else if (state == "idle"){
+            std::cout << "Call ended\n";
         } else {
-            std::cout << "Smth else\n";
+            std::cout << "WHAT CAN IT BE??\n";
         } 
     }
 
-    void MobileClient::handleOperData(std::string& xpath, std::string& operValue) const {
+    void MobileClient::handleOperData(std::string& xpath, std::string& operValue) {
         operValue = _name;
         xpath = "/mobile-network:core/subscribers[number='" + _number + "']/userName";
-    }
-
-    bool MobileClient::getCallInitializer() const {
-        return _callInitializer;
     }
 
     std::string MobileClient::getXpathState() const {

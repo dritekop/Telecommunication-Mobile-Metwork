@@ -47,7 +47,7 @@ public:
     *
     *@returns true if ok, otherwise false
     */
-    bool subscribeForModelChanges(const mobileclient::MobileClient& refUser);
+    bool subscribeForModelChanges(mobileclient::MobileClient& refUser);
 
     /*    
     *@breaf register operational data and sets value to the noconfig leaf
@@ -57,7 +57,7 @@ public:
     *
     *@return true if ok, otherwise false
     */
-    bool registerOperData(const mobileclient::MobileClient& refUser);
+    bool registerOperData(mobileclient::MobileClient& refUser);
 
     /*    
     *@breaf indicates sent rpc
@@ -72,7 +72,7 @@ public:
     bool subscribeForRpc(const std::string& sXpath, const size_t& amount, const std::map<std::string, std::string>& leafNameValue);
 
     /*
-    *@breaf passed module will send nitofications if it is needed
+    *@breaf passed module will send notifications if it is needed
     *
     *@param s_xpath The string where are stored names of the module and of the notif-node that should send notifications
     * s_leaf_value The map where the key is the string marking the leaf's name and 
