@@ -5,6 +5,17 @@ namespace mobileclient {
         _name = name;
     }
 
+    void MobileClient::dryMethod(std::string& state, std::string& incomingNumber) {
+        std::map<std::string, std::string> mapXpathValue = { 
+            {_xpathState, state},
+            {_xpathIncomingNumber, incomingNumber}
+        };
+        _agent->fetchData(mapXpathValue);
+
+        state = mapXpathValue[_xpathState];
+        incomingNumber = mapXpathValue[_xpathIncomingNumber];
+    }
+
     bool MobileClient::registerClient(const std::string& number) {
         if (!_number.empty())
             return false;
@@ -64,18 +75,15 @@ namespace mobileclient {
     void MobileClient::answer() {
         std::string state;
         std::string incomingNumber;
-        std::map<std::string, std::string> mapXpathValue = { 
-            {_xpathState, state},
-            {_xpathIncomingNumber, incomingNumber}
-        };
-        _agent->fetchData(mapXpathValue);
+        dryMethod(state, incomingNumber);
 
-        if (_callInitializer || mapXpathValue[_xpathState] != "active") {
+        if (_callInitializer || state != "active") {
             std::cout << "Forbidden action!\n";
             return;
         }
 
-        std::string guestXpathState = "/mobile-network:core/subscribers[number='" + mapXpathValue[_xpathIncomingNumber] + "']/state";
+        std::cout << state << " " << incomingNumber << std::endl;
+        std::string guestXpathState = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/state";
         _agent->changeData(guestXpathState, "busy");
         _agent->changeData(_xpathState, "busy");
     }
@@ -83,19 +91,15 @@ namespace mobileclient {
     void MobileClient::reject() {
         std::string state;
         std::string incomingNumber;
-        std::map<std::string, std::string> mapXpathValue = { 
-            {_xpathState, state},
-            {_xpathIncomingNumber, incomingNumber}
-        };
-        _agent->fetchData(mapXpathValue);
+        dryMethod(state, incomingNumber);
 
-        if (mapXpathValue[_xpathState] != "active") {
+        if (state != "active") {
             std::cout << "Forbidden action!\n";
             return;
         }
 
-        std::string guestXpathState = "/mobile-network:core/subscribers[number='" + mapXpathValue[_xpathIncomingNumber] + "']/state";
-        std::string guestXpathIncomingNumber = "/mobile-network:core/subscribers[number='" + mapXpathValue[_xpathIncomingNumber] + "']/incomingNumber";
+        std::string guestXpathState = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/state";
+        std::string guestXpathIncomingNumber = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/incomingNumber";
         _agent->changeData(guestXpathState, "idle");
         _agent->changeData(_xpathState, "idle");
         _agent->changeData(guestXpathIncomingNumber, "");
@@ -105,18 +109,14 @@ namespace mobileclient {
     void MobileClient::callEnd() {
         std::string state;
         std::string incomingNumber;
-        std::map<std::string, std::string> mapXpathValue = { 
-            {_xpathState, state},
-            {_xpathIncomingNumber, incomingNumber}
-        };
-        _agent->fetchData(mapXpathValue);
+        dryMethod(state, incomingNumber);
 
-        if (mapXpathValue[_xpathState] != "busy") {
+        if (state != "busy") {
             std::cout << "Forbidden action!\n";
             return;
         }
 
-        std::string guestXpathState = "/mobile-network:core/subscribers[number='" + mapXpathValue[_xpathIncomingNumber] + "']/state";
+        std::string guestXpathState = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/state";
         std::string guestXpathIncomingNumber = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/incomingNumber";
         _agent->changeData(guestXpathState, "idle");
         _agent->changeData(_xpathState, "idle");
@@ -131,8 +131,6 @@ namespace mobileclient {
         };
         _agent->fetchData(mapXpathValue);
 
-        // std::cout << std::boolalpha << _callInitializer << " call initializer, state - " << mapXpathValue[_xpathState] << std::endl;
-
         if (_callInitializer && mapXpathValue[_xpathState] == "active") {
             std::cout << "Waiting for answer...\n";
         }
@@ -141,9 +139,11 @@ namespace mobileclient {
         } 
         else if (mapXpathValue[_xpathState] == "busy") {
             std::cout << "Talking...\n";
+        } else if (mapXpathValue[_xpathState] == "idle"){
+            std::cout << "Idle\n";
         } else {
             std::cout << "Smth else\n";
-        }
+        } 
     }
 
     void MobileClient::handleOperData(std::string& xpath, std::string& operValue) const {
@@ -166,4 +166,5 @@ namespace mobileclient {
     void MobileClient::stopClient() {
         _agent->closeSys();
     }
+
 }; // namespace mobileclient ends

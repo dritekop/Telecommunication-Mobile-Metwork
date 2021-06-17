@@ -11,6 +11,8 @@ public:
 
     bool registerClient(const std::string& number);
 
+    void dryMethod(std::string& state, std::string& incomingNumber);
+
     void call(const std::string& incomingNumber);
 
     void answer();
@@ -32,6 +34,7 @@ public:
     std::string getNumber() const;
 
     void stopClient();
+
 
 private:
     bool _callInitializer = false;
