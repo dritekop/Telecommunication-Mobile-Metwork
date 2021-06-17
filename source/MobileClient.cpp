@@ -27,14 +27,24 @@ namespace mobileclient {
         _xpathIncomingNumber = _xpathState;
         _xpathIncomingNumber.erase(_xpathIncomingNumber.rfind("/"));
         _xpathIncomingNumber += "/incomingNumber";
-        
+
         _xpathUserName = _xpathState;
         _xpathUserName.erase(_xpathUserName.rfind("/"));
         _xpathUserName += "/userName";
 
-        std::string value = "idle";
         _agent = std::make_unique<netconfag::NetConfAgent>();
         _agent->initSysrepo();
+
+        std::string state;
+        std::map<std::string, std::string> testNumber = {
+            {_xpathState, state}
+        };
+        _agent->fetchData(testNumber);
+        if (!testNumber[_xpathState].empty())
+            return false;
+
+        std::string value = "idle";
+        
         _agent->registerOperData(*this);
         _agent->changeData(_xpathState, value);
         _agent->subscribeForModelChanges(*this);
@@ -43,6 +53,10 @@ namespace mobileclient {
     }
 
     void MobileClient::call(const std::string& incomingNumber) {
+        if (incomingNumber == _number) {
+            std::cout << "Forbidden action!\n";
+            return;
+        }
         std::string guestXpathState = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/state";
         
         std::string hostValueState;

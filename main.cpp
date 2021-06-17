@@ -73,9 +73,12 @@ void funRegister(const std::vector<std::string>& lineTokens, std::unique_ptr<mob
     std::regex numRegex("\\+380([0-9]{9})");
 
     if (std::regex_match(number,numRegex)) {
-        if (user->registerClient(number))
+        if (user->registerClient(number)) {
             ::exitHandler = true;
-        std::cout << "Subscriber was succesfully registered\n";
+            std::cout << "Subscriber was succesfully registered\n";
+        } else {
+            std::cout << "Number is already registered by other user.\n";
+        }
     } 
     else {
         std::cout << "Number should have format +380XXXXXXXXX\n";
