@@ -82,7 +82,6 @@ namespace mobileclient {
             return;
         }
 
-        std::cout << state << " " << incomingNumber << std::endl;
         std::string guestXpathState = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/state";
         _agent->changeData(guestXpathState, "busy");
         _agent->changeData(_xpathState, "busy");
