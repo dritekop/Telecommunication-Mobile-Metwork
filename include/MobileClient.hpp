@@ -11,6 +11,8 @@ public:
 
     bool registerClient(const std::string& number);
 
+    void unregisterClient();
+
     void dryMethod(std::string& state, std::string& incomingNumber) const;
 
     void call(const std::string& incomingNumber);

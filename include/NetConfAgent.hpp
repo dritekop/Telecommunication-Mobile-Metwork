@@ -89,7 +89,7 @@ public:
     *
     *@return true if ok, otherwise false
     */
-    bool changeData(const std::string& sXpath, const std::string& value);
+    bool changeData(const std::string& sXpath, const std::string& value = "");
 
 private:
     sysrepo::S_Connection _s_conn;

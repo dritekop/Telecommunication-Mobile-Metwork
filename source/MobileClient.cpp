@@ -57,6 +57,17 @@ namespace mobileclient {
         return true;
     }
 
+    void MobileClient::unregisterClient() {
+        std::string deletePath = "/mobile-network:core/subscribers[number='" + _number + "']";
+        _agent->changeData(deletePath);
+        _agent->closeSys();
+        _agent.reset();
+        _number.erase();
+        _xpathState.erase();
+        _xpathIncomingNumber.erase();
+        _xpathUserName.erase();
+    }
+
     void MobileClient::call(const std::string& incomingNumber) {
         if (incomingNumber == _number) {
             std::cout << "Forbidden action!\n";
@@ -156,9 +167,10 @@ namespace mobileclient {
         else if (state == "busy") {
             std::cout << "Talking with " << incomingNumber << "...\n";
         } else if (state == "idle"){
+            _callInitializer = false;
             std::cout << "Call ended\n";
         } else {
-            std::cout << "WHAT CAN IT BE??\n";
+            std::cout << "User is unregistered\n";
         } 
     }
 

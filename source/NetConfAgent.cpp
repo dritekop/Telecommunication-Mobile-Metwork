@@ -22,6 +22,9 @@ bool NetConfAgent::initSysrepo()
 bool NetConfAgent::closeSys() {
     try {
         _s_sess->session_stop();
+        _s_sess.reset();
+        _s_conn.reset();
+        _s_sub.reset();
         return true;
     } catch (const std::exception& e) {
         std::cout << e.what() << std::endl;
@@ -161,14 +164,26 @@ bool NetConfAgent::notifySysrepo(const std::string& sXpath, const std::map<std::
 
 bool NetConfAgent::changeData(const std::string& sXpath, const std::string& value) 
 {
-    try {
-        _s_sess->set_item_str(sXpath.c_str(), value.c_str());
-        _s_sess->apply_changes();
+    if (!value.empty()) {
+        try {
+            _s_sess->set_item_str(sXpath.c_str(), value.c_str());
+            _s_sess->apply_changes();
 
-        return true;
-    } catch (const std::exception& e) {
-        std::cout << e.what() << std::endl; 
-        return false;
+            return true;
+        } catch (const std::exception& e) {
+            std::cout << e.what() << std::endl; 
+            return false;
+        }
+    } else {
+        try {
+            _s_sess->delete_item(sXpath.c_str());
+            _s_sess->apply_changes();
+
+            return true;
+        } catch (const std::exception& e) {
+            std::cout << e.what() << std::endl;
+            return false;
+        }
     }
 }
 
