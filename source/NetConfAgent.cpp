@@ -51,10 +51,15 @@ bool NetConfAgent::subscribeForModelChanges(mobileclient::MobileClient& refUser)
         auto subscribe = [&refUser] (sysrepo::S_Session session, const char* module_name, const char* xpath,\
             sr_event_t event, uint32_t request_id) {
             if (SR_EV_DONE == event) {
-                auto iter = session->get_changes_iter(xpath);
+                auto iter = session->dup_changes_iter(xpath);
                 auto changes = session->get_change_next(iter);
-                std::string change = changes->new_val()->val_to_string();
-                refUser.handleModuleChange(change);
+                auto change = changes->new_val();
+                std::string value;
+                if (change != nullptr)
+                    value = change->val_to_string();
+                else
+                    value = "deleted";
+                refUser.handleModuleChange(value);
             }
             return SR_ERR_OK;
         };
