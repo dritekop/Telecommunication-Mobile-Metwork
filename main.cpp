@@ -100,8 +100,8 @@ void funUnregister(const std::vector<std::string>& lineTokens, std::unique_ptr<m
     }
 
     if (::exitHandler) {
-        user->unregisterClient();
-        ::exitHandler = false;
+        if (user->unregisterClient())
+            ::exitHandler = false;
     }
     else {
         std::exit(EXIT_FAILURE);

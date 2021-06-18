@@ -26,7 +26,13 @@ public:
     */
     bool initSysrepo();
 
-    /* */
+    /*    
+    *@breaf closes sysrepo session
+    *
+    *@param no
+    *
+    *@return true if ok, otherwise false
+    */
     bool closeSys();
 
     /*    
@@ -40,20 +46,19 @@ public:
     bool fetchData(std::map<std::string, std::string>& sXpathAndValue);
 
     /*    
-    *@breaf print changes in the module
+    *@breaf calls parameter's method that handles module's changes
     *
-    *@param s_xpath The string shows module where changes should be monitored
-    * number The string to complete s_xpath correctly
+    *@param refUser The user-defined MobileClient reference
     *
     *@returns true if ok, otherwise false
     */
     bool subscribeForModelChanges(mobileclient::MobileClient& refUser);
 
     /*    
-    *@breaf register operational data and sets value to the noconfig leaf
+    *@breaf register operational data and sets value to the noconfig leaf, 
+    * using the parameter's method
     *
-    *@param module_name The string names module where is located noconfig leaf, 
-    * ptrUser The pointer to the user-defined class in order to call its method  
+    *@param refUser The user-defined MobileClient reference
     *
     *@return true if ok, otherwise false
     */
@@ -83,9 +88,9 @@ public:
     bool notifySysrepo(const std::string& sXpath, const std::map<std::string, std::string>& sLeafValue);
 
     /*    
-    *@breaf sets data for leaf of the model instance
+    *@breaf sets data for leaf of the model instance or delete if the second parameter isn't provided
     *
-    *@param xpath The string, value The string
+    *@param xpath The string, value The string with the default value ""
     *
     *@return true if ok, otherwise false
     */

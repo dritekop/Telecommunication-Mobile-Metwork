@@ -5,7 +5,7 @@ namespace mobileclient {
         _name = name;
     }
 
-    void MobileClient::dryMethod(std::string& state, std::string& incomingNumber) const {
+    void MobileClient::dryMethodOne(std::string& state, std::string& incomingNumber) const {
         std::map<std::string, std::string> mapXpathValue = { 
             {_xpathState, state},
             {_xpathIncomingNumber, incomingNumber}
@@ -57,7 +57,17 @@ namespace mobileclient {
         return true;
     }
 
-    void MobileClient::unregisterClient() {
+    bool MobileClient::unregisterClient() {
+        std::string state;
+        std::map<std::string, std::string> testNumber = {
+            {_xpathState, state}
+        };
+        _agent->fetchData(testNumber);
+        if (testNumber[_xpathState] != "idle") {
+            std::cout << "Can't unregister. Try later, subscriber is " << testNumber[_xpathState] << " now.\n";
+            return false;
+        }
+
         std::string deletePath = "/mobile-network:core/subscribers[number='" + _number + "']";
         _agent->changeData(deletePath);
         _agent->closeSys();
@@ -66,6 +76,7 @@ namespace mobileclient {
         _xpathState.erase();
         _xpathIncomingNumber.erase();
         _xpathUserName.erase();
+        return true;
     }
 
     void MobileClient::call(const std::string& incomingNumber) {
@@ -105,7 +116,7 @@ namespace mobileclient {
     void MobileClient::answer() {
         std::string state;
         std::string incomingNumber;
-        dryMethod(state, incomingNumber);
+        dryMethodOne(state, incomingNumber);
 
         if (_callInitializer || state != "active") {
             std::cout << "Forbidden action!\n";
@@ -120,7 +131,7 @@ namespace mobileclient {
     void MobileClient::reject() {
         std::string state;
         std::string incomingNumber;
-        dryMethod(state, incomingNumber);
+        dryMethodOne(state, incomingNumber);
 
         if (state != "active") {
             std::cout << "Forbidden action!\n";
@@ -138,7 +149,7 @@ namespace mobileclient {
     void MobileClient::callEnd() {
         std::string state;
         std::string incomingNumber;
-        dryMethod(state, incomingNumber);
+        dryMethodOne(state, incomingNumber);
 
         if (state != "busy") {
             std::cout << "Forbidden action!\n";
@@ -156,7 +167,7 @@ namespace mobileclient {
     void MobileClient::handleModuleChange() {
         std::string state;
         std::string incomingNumber;
-        dryMethod(state, incomingNumber);
+        dryMethodOne(state, incomingNumber);
 
         if (_callInitializer && state == "active") {
             std::cout << "Waiting for answer...\n";
