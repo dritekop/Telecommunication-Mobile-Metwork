@@ -50,8 +50,12 @@ bool NetConfAgent::subscribeForModelChanges(mobileclient::MobileClient& refUser)
     try {
         auto subscribe = [&refUser] (sysrepo::S_Session session, const char* module_name, const char* xpath,\
             sr_event_t event, uint32_t request_id) {
-            if (SR_EV_DONE == event)
-                refUser.handleModuleChange();
+            if (SR_EV_DONE == event) {
+                auto iter = session->get_changes_iter(xpath);
+                auto changes = session->get_change_next(iter);
+                std::string change = changes->new_val()->val_to_string();
+                refUser.handleModuleChange(change);
+            }
             return SR_ERR_OK;
         };
         

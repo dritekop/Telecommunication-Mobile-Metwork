@@ -164,20 +164,16 @@ namespace mobileclient {
         _agent->changeData(_xpathIncomingNumber, "");
     }
 
-    void MobileClient::handleModuleChange() {
-        std::string state;
-        std::string incomingNumber;
-        dryMethodOne(state, incomingNumber);
-
-        if (_callInitializer && state == "active") {
+    void MobileClient::handleModuleChange(const std::string& change) {
+        if (_callInitializer && change == "active") {
             std::cout << "Waiting for answer...\n";
         }
-        else if (!_callInitializer && state == "active") {
-            std::cout << "Incoming call from " << incomingNumber << ". answer or reject?\n";
+        else if (!_callInitializer && change == "active") {
+            std::cout << "Incoming call. answer or reject?\n";
         } 
-        else if (state == "busy") {
-            std::cout << "Talking with " << incomingNumber << "...\n";
-        } else if (state == "idle"){
+        else if (change == "busy") {
+            std::cout << "Talking...\n";
+        } else if (change == "idle"){
             _callInitializer = false;
             std::cout << "Call ended\n";
         } else {

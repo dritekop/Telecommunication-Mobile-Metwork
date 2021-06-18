@@ -86,7 +86,7 @@ public:
     *
     *@return void
     */
-    void handleModuleChange();
+    void handleModuleChange(const std::string& change);
 
     /*    
     *@breaf this method helps to send respective data to the netconfagent to set the noconfig leaf's value
