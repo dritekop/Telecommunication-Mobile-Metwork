@@ -41,7 +41,7 @@ public:
     *
     *@return void
     */
-    void dryMethodOne(std::string& state, std::string& incomingNumber) const;
+    void fetchXpathValue(std::string& state, std::string& incomingNumber) const;
 
     /*    
     *@breaf makes respective changes in the instances
@@ -82,7 +82,7 @@ public:
     /*    
     *@breaf here is concentrated a logic how program reacts on the module's changes
     *
-    *@param no
+    *@param change The string
     *
     *@return void
     */

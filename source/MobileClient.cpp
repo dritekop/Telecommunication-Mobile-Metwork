@@ -5,7 +5,7 @@ namespace mobileclient {
         _name = name;
     }
 
-    void MobileClient::dryMethodOne(std::string& state, std::string& incomingNumber) const {
+    void MobileClient::fetchXpathValue(std::string& state, std::string& incomingNumber) const {
         std::map<std::string, std::string> mapXpathValue = { 
             {_xpathState, state},
             {_xpathIncomingNumber, incomingNumber}
@@ -116,7 +116,7 @@ namespace mobileclient {
     void MobileClient::answer() {
         std::string state;
         std::string incomingNumber;
-        dryMethodOne(state, incomingNumber);
+        fetchXpathValue(state, incomingNumber);
 
         if (_callInitializer || state != "active") {
             std::cout << "Forbidden action!\n";
@@ -131,7 +131,7 @@ namespace mobileclient {
     void MobileClient::reject() {
         std::string state;
         std::string incomingNumber;
-        dryMethodOne(state, incomingNumber);
+        fetchXpathValue(state, incomingNumber);
 
         if (state != "active") {
             std::cout << "Forbidden action!\n";
@@ -149,7 +149,7 @@ namespace mobileclient {
     void MobileClient::callEnd() {
         std::string state;
         std::string incomingNumber;
-        dryMethodOne(state, incomingNumber);
+        fetchXpathValue(state, incomingNumber);
 
         if (state != "busy") {
             std::cout << "Forbidden action!\n";
