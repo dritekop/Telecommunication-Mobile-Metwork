@@ -171,7 +171,7 @@ bool NetConfAgent::notifySysrepo(const std::string& sXpath, const std::map<std::
     }
 }
 
-bool NetConfAgent::changeData(const std::string& sXpath, const std::string& value) 
+bool NetConfAgent::changeData(const std::string& sXpath, const std::string& value)//+operation parameter 
 {
     if (!value.empty()) {
         try {
