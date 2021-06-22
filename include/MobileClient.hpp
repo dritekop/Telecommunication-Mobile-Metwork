@@ -7,6 +7,8 @@ namespace mobileclient {
 
 class MobileClient {
 public:
+    MobileClient();
+
     /*    
     *@breaf sets name to be changed in the noconfig leaf of this istance
     *

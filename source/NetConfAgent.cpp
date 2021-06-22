@@ -19,14 +19,18 @@ bool NetConfAgent::initSysrepo()
     }
 }
 
-bool NetConfAgent::closeSys() {
-    try {
+bool NetConfAgent::closeSys() 
+{
+    try 
+    {
         _s_sess->session_stop();
         _s_sess.reset();
         _s_conn.reset();
         _s_sub.reset();
         return true;
-    } catch (const std::exception& e) {
+    } 
+    catch (const std::exception& e) 
+    {
         std::cout << e.what() << std::endl;
         return false;
     }
@@ -34,23 +38,29 @@ bool NetConfAgent::closeSys() {
 
 bool NetConfAgent::fetchData(std::map<std::string, std::string>& sXpathAndValue) 
 {
-    try {
-        for (auto item : sXpathAndValue) {
+    try 
+    {
+        for (auto item : sXpathAndValue) 
+        {
             item.second = _s_sess->get_item(item.first.c_str())->val_to_string();
             sXpathAndValue[item.first] = item.second;
         }
         return true;
-    } catch (const std::exception& e) {
+    } 
+    catch (const std::exception& e) 
+    {
         return false;
     }
 }
 
 bool NetConfAgent::subscribeForModelChanges(mobileclient::MobileClient& refUser)
 {
-    try {
+    try 
+    {
         auto subscribe = [&refUser] (sysrepo::S_Session session, const char* module_name, const char* xpath,\
             sr_event_t event, uint32_t request_id) {
-            if (SR_EV_DONE == event) {
+            if (SR_EV_DONE == event) 
+            {
                 auto iter = session->dup_changes_iter(xpath);
                 auto changes = session->get_change_next(iter);
                 auto change = changes->new_val();
@@ -67,7 +77,9 @@ bool NetConfAgent::subscribeForModelChanges(mobileclient::MobileClient& refUser)
         _s_sub->module_change_subscribe(refUser.getModuleName().c_str(), subscribe, refUser.getXpathState().c_str());
 
         return true;
-    } catch (const std::exception& e) {
+    } 
+    catch (const std::exception& e) 
+    {
         std::cout << e.what() << std::endl;
         return false;
     }
@@ -75,9 +87,11 @@ bool NetConfAgent::subscribeForModelChanges(mobileclient::MobileClient& refUser)
 
 bool NetConfAgent::registerOperData(mobileclient::MobileClient& refUser) 
 {
-    try {
+    try 
+    {
         auto cb = [&refUser] (sysrepo::S_Session session, const char *module_name, const char *path, const char *request_xpath,
-            uint32_t request_id, libyang::S_Data_Node &parent) {
+            uint32_t request_id, libyang::S_Data_Node &parent) 
+        {
             std::string xpath;
             std::string operValue;
             refUser.handleOperData(xpath, operValue);
@@ -95,7 +109,9 @@ bool NetConfAgent::registerOperData(mobileclient::MobileClient& refUser)
         _s_sub->oper_get_items_subscribe(refUser.getModuleName().c_str(), cb, subPath.c_str());
 
         return true;
-    } catch (const std::exception& e) {
+    } 
+    catch (const std::exception& e) 
+    {
         std::cout << e.what() << std::endl;        
         return false;
     }
@@ -103,14 +119,17 @@ bool NetConfAgent::registerOperData(mobileclient::MobileClient& refUser)
 
 bool NetConfAgent::subscribeForRpc(const std::string& sXpath, const size_t& amount, const std::map<std::string, std::string>& leafNameValue) 
 {
-    try {
+    try 
+    {
         auto cbVals = [sXpath, amount, leafNameValue](sysrepo::S_Session session, const char* op_path, const sysrepo::S_Vals input,\
-            sr_event_t event, uint32_t request_id, sysrepo::S_Vals_Holder output) {
+            sr_event_t event, uint32_t request_id, sysrepo::S_Vals_Holder output) 
+        {
             std::cout << "\n ========== RPC CALLED ==========\n" << std::endl;
 
             auto out_vals = output->allocate(amount);
 
-            for(size_t n = 0; n < input->val_cnt(); ++n) {
+            for(size_t n = 0; n < input->val_cnt(); ++n) 
+            {
                 auto value = input->val(n);
                 std::cout << value->xpath();
                 std::cout << " = " << value->data()->get_string() << std::endl;    
@@ -144,7 +163,9 @@ bool NetConfAgent::subscribeForRpc(const std::string& sXpath, const size_t& amou
         _s_sub->rpc_subscribe(sXpath.c_str(), cbVals, 1);
 
         return true;
-    } catch (const std::exception& e) {
+    } 
+    catch (const std::exception& e) 
+    {
         std::cout << e.what() << std::endl;
         return false;
     }
@@ -152,11 +173,13 @@ bool NetConfAgent::subscribeForRpc(const std::string& sXpath, const size_t& amou
 
 bool NetConfAgent::notifySysrepo(const std::string& sXpath, const std::map<std::string, std::string>& sLeafValue) 
 {
-    try {
+    try 
+    {
         auto in_vals = std::make_shared<sysrepo::Vals>(sLeafValue.size());
 
         size_t i = 0;
-        for (auto item : sLeafValue) {
+        for (auto item : sLeafValue) 
+        {
             std::string setXpath = sXpath + "/" + item.first;
             in_vals->val(i)->set(setXpath.c_str(), item.second.c_str(), SR_STRING_T);
             ++i;
@@ -165,7 +188,9 @@ bool NetConfAgent::notifySysrepo(const std::string& sXpath, const std::map<std::
         _s_sess->event_notif_send(sXpath.c_str(), in_vals);
 
         return true;
-    } catch (const std::exception& e) {
+    } 
+    catch (const std::exception& e) 
+    {
         std::cout << e.what() << std::endl;
         return false;
     }
@@ -173,23 +198,32 @@ bool NetConfAgent::notifySysrepo(const std::string& sXpath, const std::map<std::
 
 bool NetConfAgent::changeData(const std::string& sXpath, const std::string& value)//+operation parameter 
 {
-    if (!value.empty()) {
-        try {
+    if (!value.empty()) 
+    {
+        try 
+        {
             _s_sess->set_item_str(sXpath.c_str(), value.c_str());
             _s_sess->apply_changes();
 
             return true;
-        } catch (const std::exception& e) {
+        } 
+        catch (const std::exception& e) 
+        {
             std::cout << e.what() << std::endl; 
             return false;
         }
-    } else {
-        try {
+    } 
+    else 
+    {
+        try 
+        {
             _s_sess->delete_item(sXpath.c_str());
             _s_sess->apply_changes();
 
             return true;
-        } catch (const std::exception& e) {
+        } 
+        catch (const std::exception& e) 
+        {
             std::cout << e.what() << std::endl;
             return false;
         }

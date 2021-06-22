@@ -62,8 +62,10 @@ int main()
     }
 }
 
-void actionControl() {
-    if (!exitHandler) {
+void actionControl() 
+{
+    if (!exitHandler) 
+    {
         std::cout << "Sorry...\n";
         std::exit(EXIT_FAILURE);
     }
@@ -71,7 +73,8 @@ void actionControl() {
 
 void funRegister(const std::vector<std::string>& lineTokens, std::unique_ptr<mobileclient::MobileClient>& user) 
 {
-    if (lineTokens.size() != TWO_ARGS) {
+    if (lineTokens.size() != TWO_ARGS) 
+    {
         std::cout << "Wrong number of the arguments\n";
         return;
     }
@@ -79,38 +82,46 @@ void funRegister(const std::vector<std::string>& lineTokens, std::unique_ptr<mob
     std::string number = lineTokens.at(SECOND_WORD);
     std::regex numRegex("\\+380([0-9]{9})");
 
-    if (std::regex_match(number,numRegex)) {
-        if (user->registerClient(number)) {
+    if (std::regex_match(number,numRegex)) 
+    {
+        if (user->registerClient(number)) 
+        {
             ::exitHandler = true;
             std::cout << "Subscriber was succesfully registered\n";
-        } else {
+        } else 
+        {
             std::cout << "Number is already registered by other user.\n";
         }
     } 
-    else {
+    else 
+    {
         std::cout << "Number should have format +380XXXXXXXXX\n";
     }
 }
 
 void funUnregister(const std::vector<std::string>& lineTokens, std::unique_ptr<mobileclient::MobileClient>& user) 
 {
-    if (lineTokens.size() != ONE_ARG) {
+    if (lineTokens.size() != ONE_ARG) 
+    {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
 
-    if (::exitHandler) {
+    if (::exitHandler) 
+    {
         if (user->unregisterClient())
             ::exitHandler = false;
     }
-    else {
+    else 
+    {
         std::exit(EXIT_FAILURE);
     }
 }
 
 void funCall(const std::vector<std::string>& lineTokens, std::unique_ptr<mobileclient::MobileClient>& user) 
 {
-    if (lineTokens.size() != TWO_ARGS) {
+    if (lineTokens.size() != TWO_ARGS) 
+    {
         std::cout << "Wrong number of the arguments\n";
         return;
     }
@@ -120,21 +131,27 @@ void funCall(const std::vector<std::string>& lineTokens, std::unique_ptr<mobilec
     std::string number = lineTokens.at(SECOND_WORD);
     std::regex numRegex("\\+380([0-9]{9})");
 
-    if (std::regex_match(number, numRegex)) {
-        try {
+    if (std::regex_match(number, numRegex))
+    {
+        try 
+        {
             user->call(number);
-        } catch (const std::exception& e) {
+        } 
+        catch (const std::exception& e) 
+        {
             std::cout << "Invalid number.\n";
         } 
     } 
-    else {
+    else 
+    {
         std::cout << "Number should have format +380XXXXXXXXX\n";
     }
 }
 
 void funName(const std::vector<std::string>& lineTokens, std::unique_ptr<mobileclient::MobileClient>& user) 
 {
-    if (lineTokens.size() < TWO_ARGS) {
+    if (lineTokens.size() < TWO_ARGS) 
+    {
         std::cout << "Wrong number of the arguments\n";
         return;
     }
@@ -148,17 +165,20 @@ void funName(const std::vector<std::string>& lineTokens, std::unique_ptr<mobilec
 
     std::regex nameRegex("[a-zA-Z]([ a-zA-Z0-9]+)");
 
-    if (std::regex_match(name,nameRegex)) {
+    if (std::regex_match(name,nameRegex)) 
+    {
         user->setName(name);
     } 
-    else {
+    else 
+    {
         std::cout << "Error. Change the name.\n";
     }
 }
 
 void funAnswer(const std::vector<std::string>& lineTokens, std::unique_ptr<mobileclient::MobileClient>& user) 
 {
-    if (lineTokens.size() != ONE_ARG) {
+    if (lineTokens.size() != ONE_ARG) 
+    {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
@@ -170,7 +190,8 @@ void funAnswer(const std::vector<std::string>& lineTokens, std::unique_ptr<mobil
 
 void funReject(const std::vector<std::string>& lineTokens, std::unique_ptr<mobileclient::MobileClient>& user) 
 {
-    if (lineTokens.size() != ONE_ARG) {
+    if (lineTokens.size() != ONE_ARG) 
+    {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
@@ -182,7 +203,8 @@ void funReject(const std::vector<std::string>& lineTokens, std::unique_ptr<mobil
 
 void funCallEnd(const std::vector<std::string>& lineTokens, std::unique_ptr<mobileclient::MobileClient>& user) 
 {
-    if (lineTokens.size() != ONE_ARG) {
+    if (lineTokens.size() != ONE_ARG) 
+    {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
@@ -194,12 +216,14 @@ void funCallEnd(const std::vector<std::string>& lineTokens, std::unique_ptr<mobi
 
 void funExit(const std::vector<std::string>& lineTokens, std::unique_ptr<mobileclient::MobileClient>& user) 
 {
-    if (lineTokens.size() != ONE_ARG) {
+    if (lineTokens.size() != ONE_ARG) 
+    {
         std::cout << "This command doesn't need any argument\n";
         return;
     }
 
-    if (::exitHandler) {
+    if (::exitHandler) 
+    {
         user->stopClient();
         std::cout << "Thank you for using our product\n";
     }
@@ -214,7 +238,8 @@ void actionDetect(std::string& inputLine, std::unique_ptr<mobileclient::MobileCl
     std::string command;
 
     size_t pos = START;
-    while ((pos = inputLine.find(spaceDelimiter)) != std::string::npos) {
+    while ((pos = inputLine.find(spaceDelimiter)) != std::string::npos) 
+    {
         words.push_back(inputLine.substr(START, pos));
         inputLine.erase(START, pos + spaceDelimiter.length());
     }
@@ -222,9 +247,12 @@ void actionDetect(std::string& inputLine, std::unique_ptr<mobileclient::MobileCl
 
     command = words.at(START);
 
-    try {
+    try 
+    {
         commandList.at(command)(words, user);
-    } catch (std::out_of_range& e) {
+    } 
+    catch (std::out_of_range& e) 
+    {
         std::cout << "Invalid operation\n";
     }
 }
