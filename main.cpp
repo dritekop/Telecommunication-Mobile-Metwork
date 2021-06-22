@@ -139,8 +139,6 @@ void funName(const std::vector<std::string>& lineTokens, std::unique_ptr<mobilec
         return;
     }
 
-    actionControl();
-
     std::string name = "";
 
     for (std::string i : lineTokens)
