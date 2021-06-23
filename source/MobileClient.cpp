@@ -1,5 +1,10 @@
 #include <MobileClient.hpp>
 
+std::string constructXpath(const std::string& number, const std::string& leaf) {
+    std::string xpath = "/mobile-network:core/subscribers[number='" + number + "']/" + leaf;
+    return xpath;
+}
+
 namespace mobileclient {
     MobileClient::MobileClient() :
         _agent(std::make_unique<netconfag::NetConfAgent>()) 
@@ -31,15 +36,11 @@ namespace mobileclient {
 
         _agent->initSysrepo();
 
-        _xpathState = "/mobile-network:core/subscribers[number='" + _number + "']/state";
-        
-        _xpathIncomingNumber = _xpathState;
-        _xpathIncomingNumber.erase(_xpathIncomingNumber.rfind("/"));
-        _xpathIncomingNumber += "/incomingNumber";
+        _xpathState = constructXpath(_number, "state");
 
-        _xpathUserName = _xpathState;
-        _xpathUserName.erase(_xpathUserName.rfind("/"));
-        _xpathUserName += "/userName";
+        _xpathIncomingNumber = constructXpath(_number, "incomingNumber");
+
+        _xpathUserName = constructXpath(_number, "userName");
 
         std::string state;
         std::map<std::string, std::string> testNumber = {
@@ -95,7 +96,8 @@ namespace mobileclient {
             std::cout << "Forbidden action!\n";
             return;
         }
-        std::string guestXpathState = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/state";
+
+        std::string guestXpathState = constructXpath(incomingNumber, "state");
         
         std::string hostValueState;
         std::string guestValueState;
@@ -117,7 +119,7 @@ namespace mobileclient {
             return;
         }
 
-        std::string guestXpathIncomingNumber = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/incomingNumber";
+        std::string guestXpathIncomingNumber = constructXpath(incomingNumber, "incomingNumber");
 
         _callInitializer = true;
         _agent->changeData(guestXpathIncomingNumber, _number);
@@ -138,7 +140,7 @@ namespace mobileclient {
             return;
         }
 
-        std::string guestXpathState = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/state";
+        std::string guestXpathState = constructXpath(incomingNumber, "state");
         _agent->changeData(guestXpathState, "busy");
         _agent->changeData(_xpathState, "busy");
     }
@@ -155,12 +157,12 @@ namespace mobileclient {
             return;
         }
 
-        std::string guestXpathState = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/state";
-        std::string guestXpathIncomingNumber = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/incomingNumber";
+        std::string guestXpathState = constructXpath(incomingNumber, "state");
+        std::string guestXpathIncomingNumber = constructXpath(incomingNumber, "incomingNumber");
         _agent->changeData(guestXpathState, "idle");
         _agent->changeData(_xpathState, "idle");
-        _agent->changeData(guestXpathIncomingNumber, "");
-        _agent->changeData(_xpathIncomingNumber, "");
+        _agent->changeData(guestXpathIncomingNumber);
+        _agent->changeData(_xpathIncomingNumber);
     }
 
     void MobileClient::callEnd() 
@@ -175,12 +177,12 @@ namespace mobileclient {
             return;
         }
 
-        std::string guestXpathState = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/state";
-        std::string guestXpathIncomingNumber = "/mobile-network:core/subscribers[number='" + incomingNumber + "']/incomingNumber";
+        std::string guestXpathState = constructXpath(incomingNumber, "state");
+        std::string guestXpathIncomingNumber = constructXpath(incomingNumber, "incomingNumber");
         _agent->changeData(guestXpathState, "idle");
         _agent->changeData(_xpathState, "idle");
-        _agent->changeData(guestXpathIncomingNumber, "");
-        _agent->changeData(_xpathIncomingNumber, "");
+        _agent->changeData(guestXpathIncomingNumber);
+        _agent->changeData(_xpathIncomingNumber);
     }
 
     void MobileClient::handleModuleChange(const std::string& change) 
@@ -211,7 +213,7 @@ namespace mobileclient {
     void MobileClient::handleOperData(std::string& xpath, std::string& operValue) 
     {
         operValue = _name;
-        xpath = "/mobile-network:core/subscribers[number='" + _number + "']/userName";
+        xpath = _xpathUserName;
     }
 
     std::string MobileClient::getXpathState() const 

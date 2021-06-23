@@ -86,7 +86,7 @@ void funRegister(const std::vector<std::string>& lineTokens, std::unique_ptr<mob
     {
         if (user->registerClient(number)) 
         {
-            ::exitHandler = true;
+            exitHandler = true;
             std::cout << "Subscriber was succesfully registered\n";
         } else 
         {
@@ -107,10 +107,10 @@ void funUnregister(const std::vector<std::string>& lineTokens, std::unique_ptr<m
         return;
     }
 
-    if (::exitHandler) 
+    if (exitHandler) 
     {
         if (user->unregisterClient())
-            ::exitHandler = false;
+            exitHandler = false;
     }
     else 
     {
@@ -222,7 +222,7 @@ void funExit(const std::vector<std::string>& lineTokens, std::unique_ptr<mobilec
         return;
     }
 
-    if (::exitHandler) 
+    if (exitHandler) 
     {
         user->stopClient();
         std::cout << "Thank you for using our product\n";
