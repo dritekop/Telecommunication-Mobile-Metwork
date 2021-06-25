@@ -90,7 +90,7 @@ void funRegister(const std::vector<std::string>& lineTokens, std::unique_ptr<mob
             std::cout << "Subscriber was succesfully registered\n";
         } else 
         {
-            std::cout << "Number is already registered by other user.\n";
+            std::cout << "Can't register.\n";
         }
     } 
     else 

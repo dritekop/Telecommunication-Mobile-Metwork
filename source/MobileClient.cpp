@@ -9,12 +9,6 @@ std::string constructXpath(const std::string& number, const std::string& leaf) {
     return xpath;
 }
 
-// enum state {
-//     idle,
-//     active,
-//     busy
-// };
-
 };
 
 namespace mobileclient {
@@ -50,6 +44,7 @@ namespace mobileclient {
         _agent->fetchData(testNumber);
         if (!testNumber[_xpathState].empty()) 
         {
+            std::cout << "Number is registered by other user.\n";
             _number.erase();
             _xpathState.erase();
             _xpathIncomingNumber.erase();
@@ -82,7 +77,6 @@ namespace mobileclient {
         std::string deletePath = "/mobile-network:core/subscribers[number='" + _number + "']";
         _agent->changeData(deletePath);
         _agent->closeSys();
-        _agent.reset();
         _number.erase();
         _xpathState.erase();
         _xpathIncomingNumber.erase();
