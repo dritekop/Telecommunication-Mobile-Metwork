@@ -37,15 +37,6 @@ public:
     bool unregisterClient();
 
     /*    
-    *@breaf help method to set leaves' values from the instance
-    *
-    *@param state The string reference, incomingNumber The string reference
-    *
-    *@return void
-    */
-    void fetchXpathValue(std::string& state, std::string& incomingNumber) const;
-
-    /*    
     *@breaf makes respective changes in the instances
     *
     *@param incomingNumber The const string reference
@@ -109,15 +100,6 @@ public:
     std::string getXpathState() const;
 
     /*    
-    *@breaf getter
-    *
-    *@param xpath no
-    *
-    *@return string The value of the field moduleName
-    */
-    std::string getModuleName() const;
-
-    /*    
     *@breaf reset NetConfAgent pointer and erases all fields
     *
     *@param xpath no
@@ -127,14 +109,13 @@ public:
     void stopClient();
 
 private:
-    bool _callInitializer = false;
+    std::unique_ptr<netconfag::NetConfAgent> _agent;
+    bool _callInitializer;
     std::string _name;
     std::string _number;
     std::string _xpathState;
     std::string _xpathIncomingNumber;
     std::string _xpathUserName;
-    const std::string _moduleName = "mobile-network";
-    std::unique_ptr<netconfag::NetConfAgent> _agent;
 };
 
 }; // namespace mobileclient ends

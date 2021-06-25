@@ -53,7 +53,7 @@ bool NetConfAgent::fetchData(std::map<std::string, std::string>& sXpathAndValue)
     }
 }
 
-bool NetConfAgent::subscribeForModelChanges(mobileclient::MobileClient& refUser)
+bool NetConfAgent::subscribeForModelChanges(mobileclient::MobileClient& refUser, const std::string& moduleName)
 {
     try 
     {
@@ -74,7 +74,7 @@ bool NetConfAgent::subscribeForModelChanges(mobileclient::MobileClient& refUser)
             return SR_ERR_OK;
         };
         
-        _s_sub->module_change_subscribe(refUser.getModuleName().c_str(), subscribe, refUser.getXpathState().c_str());
+        _s_sub->module_change_subscribe(moduleName.c_str(), subscribe, refUser.getXpathState().c_str());
 
         return true;
     } 
@@ -85,7 +85,7 @@ bool NetConfAgent::subscribeForModelChanges(mobileclient::MobileClient& refUser)
     }
 }
 
-bool NetConfAgent::registerOperData(mobileclient::MobileClient& refUser) 
+bool NetConfAgent::registerOperData(mobileclient::MobileClient& refUser, const std::string& moduleName) 
 {
     try 
     {
@@ -106,7 +106,7 @@ bool NetConfAgent::registerOperData(mobileclient::MobileClient& refUser)
 
         std::string subPath = refUser.getXpathState();
         subPath.erase(subPath.rfind("/"));
-        _s_sub->oper_get_items_subscribe(refUser.getModuleName().c_str(), cb, subPath.c_str());
+        _s_sub->oper_get_items_subscribe(moduleName.c_str(), cb, subPath.c_str());
 
         return true;
     } 

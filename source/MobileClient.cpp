@@ -1,30 +1,31 @@
 #include <MobileClient.hpp>
 
+namespace {
+
+const std::string moduleName = "mobile-network";
+
 std::string constructXpath(const std::string& number, const std::string& leaf) {
     std::string xpath = "/mobile-network:core/subscribers[number='" + number + "']/" + leaf;
     return xpath;
 }
 
+// enum state {
+//     idle,
+//     active,
+//     busy
+// };
+
+};
+
 namespace mobileclient {
     MobileClient::MobileClient() :
-        _agent(std::make_unique<netconfag::NetConfAgent>()) 
+        _agent(std::make_unique<netconfag::NetConfAgent>()),
+        _callInitializer(false) 
     {}
 
     void MobileClient::setName(const std::string& name) 
     {
         _name = name;
-    }
-
-    void MobileClient::fetchXpathValue(std::string& state, std::string& incomingNumber) const 
-    {
-        std::map<std::string, std::string> mapXpathValue = { 
-            {_xpathState, state},
-            {_xpathIncomingNumber, incomingNumber}
-        };
-        _agent->fetchData(mapXpathValue);
-
-        state = mapXpathValue[_xpathState];
-        incomingNumber = mapXpathValue[_xpathIncomingNumber];
     }
 
     bool MobileClient::registerClient(const std::string& number) 
@@ -58,9 +59,9 @@ namespace mobileclient {
 
         std::string value = "idle";
         
-        _agent->registerOperData(*this);
+        _agent->registerOperData(*this, moduleName);
         _agent->changeData(_xpathState, value);
-        _agent->subscribeForModelChanges(*this);
+        _agent->subscribeForModelChanges(*this, moduleName);
 
         return true;
     }
@@ -132,7 +133,14 @@ namespace mobileclient {
     {
         std::string state;
         std::string incomingNumber;
-        fetchXpathValue(state, incomingNumber);
+        std::map<std::string, std::string> mapXpathValue = { 
+            {_xpathState, state},
+            {_xpathIncomingNumber, incomingNumber}
+        };
+        _agent->fetchData(mapXpathValue);
+
+        state = mapXpathValue[_xpathState];
+        incomingNumber = mapXpathValue[_xpathIncomingNumber];
 
         if (_callInitializer || state != "active") 
         {
@@ -149,7 +157,14 @@ namespace mobileclient {
     {
         std::string state;
         std::string incomingNumber;
-        fetchXpathValue(state, incomingNumber);
+        std::map<std::string, std::string> mapXpathValue = { 
+            {_xpathState, state},
+            {_xpathIncomingNumber, incomingNumber}
+        };
+        _agent->fetchData(mapXpathValue);
+
+        state = mapXpathValue[_xpathState];
+        incomingNumber = mapXpathValue[_xpathIncomingNumber];
 
         if (state != "active") 
         {
@@ -169,7 +184,14 @@ namespace mobileclient {
     {
         std::string state;
         std::string incomingNumber;
-        fetchXpathValue(state, incomingNumber);
+        std::map<std::string, std::string> mapXpathValue = { 
+            {_xpathState, state},
+            {_xpathIncomingNumber, incomingNumber}
+        };
+        _agent->fetchData(mapXpathValue);
+
+        state = mapXpathValue[_xpathState];
+        incomingNumber = mapXpathValue[_xpathIncomingNumber];
 
         if (state != "busy") 
         {
@@ -219,11 +241,6 @@ namespace mobileclient {
     std::string MobileClient::getXpathState() const 
     {
         return _xpathState;
-    }
-
-    std::string MobileClient::getModuleName() const 
-    {
-        return _moduleName;
     }
 
     void MobileClient::stopClient() 
