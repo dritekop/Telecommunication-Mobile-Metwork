@@ -224,7 +224,9 @@ void funExit(const std::vector<std::string>& lineTokens, std::unique_ptr<mobilec
 
     if (exitHandler) 
     {
-        user->stopClient();
+        if (!user->stopClient()) {
+            return;
+        }
         std::cout << "Thank you for using our product\n";
     }
 

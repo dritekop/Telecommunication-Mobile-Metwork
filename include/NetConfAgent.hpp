@@ -49,6 +49,7 @@ public:
     *@breaf calls parameter's method that handles module's changes
     *
     *@param refUser The user-defined MobileClient reference
+    *       moduleName is a string which defines module from sysrepo to work with
     *
     *@returns true if ok, otherwise false
     */
@@ -59,6 +60,7 @@ public:
     * using the parameter's method
     *
     *@param refUser The user-defined MobileClient reference
+            moduleName is a string which defines module from sysrepo to work with
     *
     *@return true if ok, otherwise false
     */
@@ -68,8 +70,8 @@ public:
     *@breaf indicates sent rpc
     *
     *@param s_xpath The string where is stored xpath to the rpc block in the yang-model
-    * amount The size of output leaves in this rpc block
-    * leaf_name_value The map where the key is the leaf name in the output block inside the  rpc block
+    *       amount The size of output leaves in this rpc block
+    *       leaf_name_value The map where the key is the leaf name in the output block inside the  rpc block
     * and mapped type is the string where is stored value to be set to that leaf  
     *
     *@returns true if ok, otherwise false
@@ -80,8 +82,8 @@ public:
     *@breaf passed module will send notifications if it is needed
     *
     *@param s_xpath The string where are stored names of the module and of the notif-node that should send notifications
-    * s_leaf_value The map where the key is the string marking the leaf's name and 
-    *              the value is the string marking the value of the notification's leaf
+    *       s_leaf_value The map where the key is the string marking the leaf's name and 
+    * the value is the string marking the value of the notification's leaf
     *
     *@return true if ok, otherwise false
     */
@@ -90,7 +92,8 @@ public:
     /*    
     *@breaf sets data for leaf of the model instance or delete if the second parameter isn't provided
     *
-    *@param xpath The string, value The string with the default value ""
+    *@param sXpath The string defines xpath, 
+            value The string with the value to be assigned, the default value is an empty string
     *
     *@return true if ok, otherwise false
     */
