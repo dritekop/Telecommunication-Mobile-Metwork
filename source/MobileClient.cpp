@@ -15,7 +15,7 @@ namespace mobileclient {
     MobileClient::MobileClient() :
         _agent(std::make_unique<netconfag::NetConfAgent>()),
         _callInitializer(false),
-        _state(idle) 
+        _state(idle)
     {}
 
     void MobileClient::setName(const std::string& name) 
