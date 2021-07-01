@@ -9,6 +9,8 @@ class MobileClient {
 public:
     MobileClient();
 
+    MobileClient(const netconfag::NetConfAgent& agent);
+
     /*    
     *@breaf sets name to be changed in the noconfig leaf of this istance
     *

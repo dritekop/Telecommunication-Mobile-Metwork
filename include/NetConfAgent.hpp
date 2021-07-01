@@ -16,26 +16,28 @@ namespace mobileclient {
 namespace netconfag {
 
 class NetConfAgent {
-public:    
-    /*    
+public:
+    virtual ~NetConfAgent() {}
+
+    /*
     *@breaf establishes sysrepo session
     *
     *@param no
     *
     *@return true if ok, otherwise false
     */
-    bool initSysrepo();
+    virtual bool initSysrepo();
 
-    /*    
+    /*
     *@breaf closes sysrepo session
     *
     *@param no
     *
     *@return true if ok, otherwise false
     */
-    bool closeSys();
+    virtual bool closeSys();
 
-    /*    
+    /*
     *@breaf gets data
     *
     *@param s_xpath and value The map where key is a string xpath and 
@@ -43,9 +45,9 @@ public:
     *
     *@returns true if ok, otherwise false
     */
-    bool fetchData(std::map<std::string, std::string>& sXpathAndValue);
+    virtual bool fetchData(std::map<std::string, std::string>& sXpathAndValue);
 
-    /*    
+    /*
     *@breaf calls parameter's method that handles module's changes
     *
     *@param refUser The user-defined MobileClient reference
@@ -53,9 +55,9 @@ public:
     *
     *@returns true if ok, otherwise false
     */
-    bool subscribeForModelChanges(mobileclient::MobileClient& refUser, const std::string& moduleName);
+    virtual bool subscribeForModelChanges(mobileclient::MobileClient& refUser, const std::string& moduleName);
 
-    /*    
+    /*
     *@breaf register operational data and sets value to the noconfig leaf, 
     * using the parameter's method
     *
@@ -64,9 +66,9 @@ public:
     *
     *@return true if ok, otherwise false
     */
-    bool registerOperData(mobileclient::MobileClient& refUser, const std::string& moduleName);
+    virtual bool registerOperData(mobileclient::MobileClient& refUser, const std::string& moduleName);
 
-    /*    
+    /*
     *@breaf indicates sent rpc
     *
     *@param s_xpath The string where is stored xpath to the rpc block in the yang-model
@@ -76,7 +78,7 @@ public:
     *
     *@returns true if ok, otherwise false
     */
-    bool subscribeForRpc(const std::string& sXpath, const size_t& amount, const std::map<std::string, std::string>& leafNameValue);
+    virtual bool subscribeForRpc(const std::string& sXpath, const size_t& amount, const std::map<std::string, std::string>& leafNameValue);
 
     /*
     *@breaf passed module will send notifications if it is needed
@@ -87,9 +89,9 @@ public:
     *
     *@return true if ok, otherwise false
     */
-    bool notifySysrepo(const std::string& sXpath, const std::map<std::string, std::string>& sLeafValue);
+    virtual bool notifySysrepo(const std::string& sXpath, const std::map<std::string, std::string>& sLeafValue);
 
-    /*    
+    /*
     *@breaf sets data for leaf of the model instance or delete if the second parameter isn't provided
     *
     *@param sXpath The string defines xpath, 
@@ -97,7 +99,7 @@ public:
     *
     *@return true if ok, otherwise false
     */
-    bool changeData(const std::string& sXpath, const std::string& value = std::string());
+    virtual bool changeData(const std::string& sXpath, const std::string& value = std::string());
 
 private:
     sysrepo::S_Connection _s_conn;

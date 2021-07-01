@@ -13,7 +13,11 @@ std::string constructXpath(const std::string& number, const std::string& leaf) {
 
 namespace mobileclient {
     MobileClient::MobileClient() :
-        _agent(std::make_unique<netconfag::NetConfAgent>()),
+        MobileClient(netconfag::NetConfAgent())
+    {}
+
+    MobileClient::MobileClient(const netconfag::NetConfAgent& agent) :
+        _agent(std::make_unique<netconfag::NetConfAgent>(agent)),
         _callInitializer(false),
         _state(idle)
     {}
