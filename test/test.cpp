@@ -5,29 +5,87 @@
 #include <MobileClient.hpp>
 
 class MobileClientTest : public testing::Test
-    {
-    protected:
+{
+protected:
     void SetUp() override
     {
-        NetConfAgentMock mock;
-        _mobileClient = std::make_unique<mobileclient::MobileClient>(mock);
+        auto tempMock = std::make_unique<testing::StrictMock<NetConfAgentMock>>();
+        _mock = tempMock.get();
+        _mobileClient = std::make_unique<mobileclient::MobileClient>(std::move(tempMock));
     }
 
     std::unique_ptr<mobileclient::MobileClient> _mobileClient;
-    testing::StrictMock<NetConfAgentMock> _mock;
+    testing::StrictMock<NetConfAgentMock> *_mock;
 };
 
 using ::testing::Return;
+using ::testing::StrictMock;
+using ::testing::AtLeast;
+using ::testing::_;
 
-TEST_F(MobileClientTest, shouldSuccedToDoSomething)
+TEST_F(MobileClientTest, shouldSucceedToSetName)
 {
-    std::string guestXpathState;
-    std::string guestValueState;
-    std::map<std::string, std::string> XpathValue = {
-        {guestXpathState, guestValueState},
-    };
-    EXPECT_CALL(_mock, fetchData(XpathValue))
-                .WillOnce(Return(false));
-    _mobileClient->call("+380911111111");
-    // TO DO EXPECT_TRUE();
+    _mobileClient->setName("Edo");
 }
+
+TEST_F(MobileClientTest, shouldSucceedToHandleModuleChange)
+{
+    _mobileClient->handleModuleChange("shit");
+}
+
+TEST_F(MobileClientTest, shouldSucceedToHandleOperData)
+{
+    std::string one = "one";
+    std::string two = "two";
+    _mobileClient->handleOperData(one, two);
+}
+
+TEST_F(MobileClientTest, shouldSuccedToCall)
+{
+    std::string one = "one";
+    std::string two = "two";
+    std::map<std::string, std::string> mapP = {
+        {one, two},
+    };
+    EXPECT_CALL(*_mock, fetchData(mapP));
+    _mobileClient->call("+380911111111");
+}
+
+// TEST_F(MobileClientTest, shouldSucceedToReject)
+// {
+//     // std::string one = "one";
+//     // std::string two = "two";
+//     // std::map<std::string, std::string> mapP = {
+//     //     {one, two},
+//     // };
+//     EXPECT_CALL(_mock, fetchData(_));
+//     _mobileClient->reject();
+// }
+
+// TEST_F(MobileClientTest, shouldSucceedToStopClient)
+// {
+//     EXPECT_CALL(_mock, closeSys());
+//     // _mobileClient->stopClient();
+// }
+
+// TEST_F(MobileClientTest, shouldSucceedToUnregister)
+// {
+//     EXPECT_CALL(_mock, changeData);
+//     // EXPECT_CALL(_mock, closeSys);
+//     _mobileClient->unregisterClient();
+// }
+
+// TEST_F(MobileClientTest, shouldSucceedToChangeData)
+// {
+//     EXPECT_CALL(_mock, changeData);
+//     // EXPECT_CALL(_mock, closeSys);
+//     _mobileClient->unregisterClient();
+// }
+
+// int main() {
+//     RUN_ALL_TESTS();    
+//     in the testlog.txt 
+//     IMPORTANT NOTICE - DO NOT IGNORE:
+//     This test program did NOT call testing::InitGoogleTest() before calling RUN_ALL_TESTS(). 
+//     This is INVALID. Soon Google Test will start to enforce the valid usage. Please fix it ASAP, or IT WILL START TO FAIL.  
+// }
