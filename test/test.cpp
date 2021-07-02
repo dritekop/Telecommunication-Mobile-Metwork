@@ -85,10 +85,9 @@ TEST_F(MobileClientTest, shouldSucceedToStopClient)
     _mobileClient->stopClient();
 }
 
-// int main() {
-//     RUN_ALL_TESTS();    
-//     in the testlog.txt 
-//     IMPORTANT NOTICE - DO NOT IGNORE:
-//     This test program did NOT call testing::InitGoogleTest() before calling RUN_ALL_TESTS(). 
-//     This is INVALID. Soon Google Test will start to enforce the valid usage. Please fix it ASAP, or IT WILL START TO FAIL.  
+// int main(int argc, char** argv) {
+//     testing::InitGoogleTest();
+//     if (RUN_ALL_TESTS()) 
+//         std::cout << "To avoid compiler warning about unused returning int value from the RUN_ALL_TESTS()\n";    
+//     // use this main function if 'main : true' isn't set in the gtest dependency 
 // }
