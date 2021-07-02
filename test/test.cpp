@@ -58,33 +58,55 @@ TEST_F(MobileClientTest, shouldSucceedToUnregister)
 }
 
 
-TEST_F(MobileClientTest, shouldSuccedToCall)
+TEST_F(MobileClientTest, shouldFailToCall)
 {
     EXPECT_CALL(*_mock, fetchData(_));
     _mobileClient->call("+380911111111");
 }
 
-TEST_F(MobileClientTest, shouldSuccedToAnswer)
+TEST_F(MobileClientTest, shouldFailToAnswer)
 {
     EXPECT_CALL(*_mock, fetchData(_));
     _mobileClient->answer();
 }
 
-TEST_F(MobileClientTest, shouldSucceedToReject)
+TEST_F(MobileClientTest, shouldSucceedToAnswer)
+{
+    _mobileClient->handleModuleChange("active");
+    EXPECT_CALL(*_mock, fetchData(_));
+    EXPECT_CALL(*_mock, changeData(_, _))
+            .Times(2);
+    _mobileClient->answer();
+}
+
+TEST_F(MobileClientTest, shouldFailToReject)
 {
     EXPECT_CALL(*_mock, fetchData(_));
     _mobileClient->reject();
 }
 
-TEST_F(MobileClientTest, shouldSuccedToCallEnd)
+TEST_F(MobileClientTest, shouldSucceedToReject)
+{
+    _mobileClient->handleModuleChange("active");
+    EXPECT_CALL(*_mock, fetchData(_));
+    EXPECT_CALL(*_mock, changeData(_, _))
+            .Times(4);
+    _mobileClient->reject();
+}
+
+TEST_F(MobileClientTest, shouldFailToCallEnd)
 {
     EXPECT_CALL(*_mock, fetchData(_));
     _mobileClient->callEnd();
 }
 
-TEST_F(MobileClientTest, shouldSucceedToHandleModuleChange)
+TEST_F(MobileClientTest, shouldSuccedToCallEnd)
 {
     _mobileClient->handleModuleChange("busy");
+    EXPECT_CALL(*_mock, fetchData(_));
+    EXPECT_CALL(*_mock, changeData(_, _))
+            .Times(4);
+    _mobileClient->callEnd();
 }
 
 TEST_F(MobileClientTest, shouldSucceedToHandleOperData)
@@ -94,9 +116,15 @@ TEST_F(MobileClientTest, shouldSucceedToHandleOperData)
     _mobileClient->handleOperData(one, two);
 }
 
-TEST_F(MobileClientTest, shouldSucceedToStopClient)
+TEST_F(MobileClientTest, shouldFailToStopClient)
 {
     EXPECT_CALL(*_mock, closeSys());
+    _mobileClient->stopClient();
+}
+
+TEST_F(MobileClientTest, shouldSucceedToStopClient)
+{
+    _mobileClient->handleModuleChange("busy");
     _mobileClient->stopClient();
 }
 
