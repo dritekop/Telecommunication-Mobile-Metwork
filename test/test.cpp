@@ -14,11 +14,21 @@ protected:
         _mobileClient = std::make_unique<mobileclient::MobileClient>(std::move(tempMock));
     }
 
+    void userAlreadyCreated() {
+        _mobileClient->registerClient("+380911111111");
+    }
+
     std::unique_ptr<mobileclient::MobileClient> _mobileClient;
     testing::StrictMock<NetConfAgentMock> *_mock;
 };
 
 using ::testing::_;
+using ::testing::Return;
+
+TEST_F(MobileClientTest, shouldSucceedToCreate)
+{
+    mobileclient::MobileClient user;
+}
 
 TEST_F(MobileClientTest, shouldSucceedToSetName)
 {
@@ -28,7 +38,12 @@ TEST_F(MobileClientTest, shouldSucceedToSetName)
 TEST_F(MobileClientTest, shouldSucceedToRegister)
 {
     EXPECT_CALL(*_mock, initSysrepo());
-    EXPECT_CALL(*_mock, fetchData(_));
+    std::string one = "/mobile-network:core/subscribers[number='+380911111111']/state";
+    std::string two;
+    std::map<std::string, std::string> testMap = {
+        {one, two}
+    };
+    EXPECT_CALL(*_mock, fetchData(testMap));
     EXPECT_CALL(*_mock, registerOperData(_, _));
     EXPECT_CALL(*_mock, changeData(_, _));
     EXPECT_CALL(*_mock, subscribeForModelChanges(_, _));
@@ -69,7 +84,7 @@ TEST_F(MobileClientTest, shouldSuccedToCallEnd)
 
 TEST_F(MobileClientTest, shouldSucceedToHandleModuleChange)
 {
-    _mobileClient->handleModuleChange("shit");
+    _mobileClient->handleModuleChange("busy");
 }
 
 TEST_F(MobileClientTest, shouldSucceedToHandleOperData)
