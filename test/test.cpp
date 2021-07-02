@@ -18,14 +18,53 @@ protected:
     testing::StrictMock<NetConfAgentMock> *_mock;
 };
 
-using ::testing::Return;
-using ::testing::StrictMock;
-using ::testing::AtLeast;
 using ::testing::_;
 
 TEST_F(MobileClientTest, shouldSucceedToSetName)
 {
     _mobileClient->setName("Edo");
+}
+
+TEST_F(MobileClientTest, shouldSucceedToRegister)
+{
+    EXPECT_CALL(*_mock, initSysrepo());
+    EXPECT_CALL(*_mock, fetchData(_));
+    EXPECT_CALL(*_mock, registerOperData(_, _));
+    EXPECT_CALL(*_mock, changeData(_, _));
+    EXPECT_CALL(*_mock, subscribeForModelChanges(_, _));
+    _mobileClient->registerClient("+380911111111");
+}
+
+TEST_F(MobileClientTest, shouldSucceedToUnregister)
+{
+    EXPECT_CALL(*_mock, changeData(_, _));
+    EXPECT_CALL(*_mock, closeSys());
+    _mobileClient->unregisterClient();
+}
+
+
+TEST_F(MobileClientTest, shouldSuccedToCall)
+{
+    EXPECT_CALL(*_mock, fetchData(_));
+    _mobileClient->call("+380911111111");
+}
+
+TEST_F(MobileClientTest, shouldSuccedToAnswer)
+{
+    EXPECT_CALL(*_mock, fetchData(_));
+    _mobileClient->answer();
+}
+
+TEST_F(MobileClientTest, shouldSucceedToReject)
+{
+    EXPECT_CALL(*_mock, fetchData(_));
+    _mobileClient->reject();
+}
+
+TEST_F(MobileClientTest, shouldSuccedToCallEnd)
+{
+    EXPECT_CALL(*_mock, fetchData(_));
+    _mobileClient->callEnd();
 }
 
 TEST_F(MobileClientTest, shouldSucceedToHandleModuleChange)
@@ -40,43 +79,10 @@ TEST_F(MobileClientTest, shouldSucceedToHandleOperData)
     _mobileClient->handleOperData(one, two);
 }
 
-TEST_F(MobileClientTest, shouldSuccedToCall)
-{
-    // std::string one = "/mobile-network:core/subscribers[number='+380911111111']/state";
-    // std::string two;
-    // std::map<std::string, std::string> mapP = {
-    //     {one, two},
-    // };
-    EXPECT_CALL(*_mock, fetchData(_));
-    _mobileClient->call("+380911111111");
-}
-
-TEST_F(MobileClientTest, shouldSucceedToReject)
-{
-    EXPECT_CALL(*_mock, fetchData(_));
-    _mobileClient->reject();
-}
-
 TEST_F(MobileClientTest, shouldSucceedToStopClient)
 {
     EXPECT_CALL(*_mock, closeSys());
     _mobileClient->stopClient();
-}
-
-TEST_F(MobileClientTest, shouldSucceedToUnregister)
-{
-    EXPECT_CALL(*_mock, changeData(_, _));
-    EXPECT_CALL(*_mock, closeSys());
-    _mobileClient->unregisterClient();
-}
-
-TEST_F(MobileClientTest, shouldSucceedToChangeData)
-{
-    std::string one = "/mobile-network:core/subscribers[number='']";
-    std::string two;
-    EXPECT_CALL(*_mock, changeData(one, two));
-    EXPECT_CALL(*_mock, closeSys());
-    _mobileClient->unregisterClient();
 }
 
 // int main() {

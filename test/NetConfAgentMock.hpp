@@ -12,10 +12,6 @@ public:
     MOCK_METHOD(bool, fetchData, ((std::map<std::string, std::string>&  sXpathAndValue)), (override));
     MOCK_METHOD(bool, subscribeForModelChanges, (mobileclient::MobileClient& refUser, const std::string& moduleName), (override));
     MOCK_METHOD(bool, registerOperData, (mobileclient::MobileClient& refUser, const std::string& moduleName), (override));
-    MOCK_METHOD(bool, subscribeForRpc, (const std::string& sXpath, const size_t& amount,\
-        (const std::map<std::string, std::string>& sXpathAndValue)), (override));
-    MOCK_METHOD(bool, notifySysrepo, (const std::string& sXpath, (const std::map<std::string, std::string>& sXpathAndValue)),\
-        (override));
     MOCK_METHOD(bool, changeData, (const std::string& sXpath, const std::string& value), (override));
 };
 
