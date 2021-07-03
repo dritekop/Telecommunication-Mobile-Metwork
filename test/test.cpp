@@ -23,6 +23,7 @@ using ::testing::Return;
 using ::testing::Assign;
 using ::testing::SetArgReferee;
 using ::testing::DoAll;
+using ::testing::SaveArg;
 
 TEST_F(MobileClientTest, shouldSucceedToCreate)
 {
@@ -52,6 +53,25 @@ TEST_F(MobileClientTest, shouldSucceedToRegister)
     _mobileClient->getXpathState();
 }
 
+TEST_F(MobileClientTest, shouldFailToRegister)
+{
+    EXPECT_CALL(*_mock, initSysrepo());
+    std::string one = "/mobile-network:core/subscribers[number='+380911111111']/state";
+    std::string two;
+    std::map<std::string, std::string> testMap = {
+        {one, two}
+    };
+
+    std::string state = "idle";
+    std::map<std::string, std::string> testMapSecond = {
+        {one, state}
+    };
+
+    EXPECT_CALL(*_mock, fetchData(testMap))
+            .WillOnce(DoAll(SetArgReferee<0>(testMapSecond), Return(true)));
+    _mobileClient->registerClient("+380911111111");
+}
+
 TEST_F(MobileClientTest, shouldSucceedToUnregister)
 {
     EXPECT_CALL(*_mock, changeData(_, _));
@@ -73,30 +93,43 @@ TEST_F(MobileClientTest, shouldFailToCall)
     _mobileClient->call("+380911111111");
     _mobileClient->handleModuleChange("busy");
     _mobileClient->call("number");
+
+    _mobileClient->handleModuleChange("idle");
+    std::string one = "/mobile-network:core/subscribers[number='+380911111111']/state";
+    std::string two;
+    std::map<std::string, std::string> testMap = {
+        {one, two}
+    };
+
+    std::string state = "busy";
+    std::map<std::string, std::string> testMapSecond = {
+        {one, state}
+    };
+    EXPECT_CALL(*_mock, fetchData(testMap))
+            .WillOnce(DoAll(SetArgReferee<0>(testMapSecond), Return(true)));
+    _mobileClient->call("+380911111111");
 }
 
-// TEST_F(MobileClientTest, shouldSucceedToCall)
-// {
-//     std::string one = "/mobile-network:core/subscribers[number='+380911111111']/state";
-//     std::string two;
-//     std::map<std::string, std::string> testMap = {
-//         {one, two}
-//     };
+TEST_F(MobileClientTest, shouldSucceedToCall)
+{
+    std::string one = "/mobile-network:core/subscribers[number='+380911111111']/state";
+    std::string two;
+    std::map<std::string, std::string> testMap = {
+        {one, two}
+    };
 
-//     std::string state = "idle";
-//     std::map<std::string, std::string> testMapSecond = {
-//         {one, state}
-//     };
+    std::string state = "idle";
+    std::map<std::string, std::string> testMapSecond = {
+        {one, state}
+    };
 
-//     EXPECT_CALL(*_mock, fetchData(testMap))
-//             .WillOnce(Assign(&testMap[one], "idle"));
-//             // .WillOnce(Return(true));
-//             // .WillOnce(SetArgReferee<1>(testMapSecond));
-//             // .WillOnce(DoAll());
-//     EXPECT_CALL(*_mock, changeData(_, _))
-//             .Times(4);
-//     _mobileClient->call("+380911111111");
-// }
+    EXPECT_CALL(*_mock, fetchData(testMap))
+            .WillOnce(DoAll(SetArgReferee<0>(testMapSecond), Return(true)));
+    EXPECT_CALL(*_mock, changeData(_, _))
+            .Times(4);
+    _mobileClient->call("+380911111111");
+    _mobileClient->handleModuleChange("active");
+}
 
 TEST_F(MobileClientTest, shouldFailToAnswer)
 {
