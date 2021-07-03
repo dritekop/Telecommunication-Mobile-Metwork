@@ -1,6 +1,6 @@
 inc = include_directories('../include')
 
-gtest_dep = dependency('gtest', main : true)
+gtest_dep = dependency('gtest')
 gmock_dep = dependency('gmock')
 sysrepo_dep = dependency('sysrepo-cpp')
 libyang_dep = dependency('libyang-cpp')

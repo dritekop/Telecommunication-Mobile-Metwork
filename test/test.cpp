@@ -14,16 +14,15 @@ protected:
         _mobileClient = std::make_unique<mobileclient::MobileClient>(std::move(tempMock));
     }
 
-    void userAlreadyCreated() {
-        _mobileClient->registerClient("+380911111111");
-    }
-
     std::unique_ptr<mobileclient::MobileClient> _mobileClient;
     testing::StrictMock<NetConfAgentMock> *_mock;
 };
 
 using ::testing::_;
 using ::testing::Return;
+using ::testing::Assign;
+using ::testing::SetArgReferee;
+using ::testing::DoAll;
 
 TEST_F(MobileClientTest, shouldSucceedToCreate)
 {
@@ -48,6 +47,9 @@ TEST_F(MobileClientTest, shouldSucceedToRegister)
     EXPECT_CALL(*_mock, changeData(_, _));
     EXPECT_CALL(*_mock, subscribeForModelChanges(_, _));
     _mobileClient->registerClient("+380911111111");
+    _mobileClient->registerClient("+380922222222");
+    _mobileClient->call("+380911111111");
+    _mobileClient->getXpathState();
 }
 
 TEST_F(MobileClientTest, shouldSucceedToUnregister)
@@ -57,12 +59,44 @@ TEST_F(MobileClientTest, shouldSucceedToUnregister)
     _mobileClient->unregisterClient();
 }
 
+TEST_F(MobileClientTest, shouldFailToUnregister)
+{
+    _mobileClient->handleModuleChange("busy");
+    _mobileClient->unregisterClient();
+}
+
 
 TEST_F(MobileClientTest, shouldFailToCall)
 {
-    EXPECT_CALL(*_mock, fetchData(_));
+    EXPECT_CALL(*_mock, fetchData(_))
+                .Times(2);
     _mobileClient->call("+380911111111");
+    _mobileClient->handleModuleChange("busy");
+    _mobileClient->call("number");
 }
+
+// TEST_F(MobileClientTest, shouldSucceedToCall)
+// {
+//     std::string one = "/mobile-network:core/subscribers[number='+380911111111']/state";
+//     std::string two;
+//     std::map<std::string, std::string> testMap = {
+//         {one, two}
+//     };
+
+//     std::string state = "idle";
+//     std::map<std::string, std::string> testMapSecond = {
+//         {one, state}
+//     };
+
+//     EXPECT_CALL(*_mock, fetchData(testMap))
+//             .WillOnce(Assign(&testMap[one], "idle"));
+//             // .WillOnce(Return(true));
+//             // .WillOnce(SetArgReferee<1>(testMapSecond));
+//             // .WillOnce(DoAll());
+//     EXPECT_CALL(*_mock, changeData(_, _))
+//             .Times(4);
+//     _mobileClient->call("+380911111111");
+// }
 
 TEST_F(MobileClientTest, shouldFailToAnswer)
 {
@@ -114,23 +148,24 @@ TEST_F(MobileClientTest, shouldSucceedToHandleOperData)
     std::string one;
     std::string two;
     _mobileClient->handleOperData(one, two);
+    _mobileClient->handleModuleChange("idle");
+    _mobileClient->handleModuleChange("deleted");
 }
 
-TEST_F(MobileClientTest, shouldFailToStopClient)
+TEST_F(MobileClientTest, shouldSucceedToStopClient)
 {
     EXPECT_CALL(*_mock, closeSys());
     _mobileClient->stopClient();
 }
 
-TEST_F(MobileClientTest, shouldSucceedToStopClient)
+TEST_F(MobileClientTest, shouldFailToStopClient)
 {
     _mobileClient->handleModuleChange("busy");
     _mobileClient->stopClient();
 }
 
-// int main(int argc, char** argv) {
-//     testing::InitGoogleTest();
-//     if (RUN_ALL_TESTS()) 
-//         std::cout << "To avoid compiler warning about unused returning int value from the RUN_ALL_TESTS()\n";    
-//     // use this main function if 'main : true' isn't set in the gtest dependency 
-// }
+int main(int argc, char** argv) {
+    // use this main function if 'main : true' isn't set in the gtest dependency 
+    testing::InitGoogleTest();
+    return RUN_ALL_TESTS();    
+}
