@@ -43,10 +43,12 @@ TEST_F(MobileClientTest, shouldSucceedToRegister)
     std::map<std::string, std::string> testMap = {
         {one, two}
     };
+    std::string moduleName = "mobile-network";
+    std::string value = "idle";
     EXPECT_CALL(*_mock, fetchData(testMap));
-    EXPECT_CALL(*_mock, registerOperData(_, _));
-    EXPECT_CALL(*_mock, changeData(_, _));
-    EXPECT_CALL(*_mock, subscribeForModelChanges(_, _));
+    EXPECT_CALL(*_mock, registerOperData(_, moduleName));
+    EXPECT_CALL(*_mock, changeData(one, value));
+    EXPECT_CALL(*_mock, subscribeForModelChanges(_, moduleName));
     _mobileClient->registerClient("+380911111111");
     _mobileClient->registerClient("+380922222222");
     _mobileClient->call("+380911111111");
@@ -74,7 +76,8 @@ TEST_F(MobileClientTest, shouldFailToRegister)
 
 TEST_F(MobileClientTest, shouldSucceedToUnregister)
 {
-    EXPECT_CALL(*_mock, changeData(_, _));
+    std::string one = "/mobile-network:core/subscribers[number='']";
+    EXPECT_CALL(*_mock, changeData(one, std::string()));
     EXPECT_CALL(*_mock, closeSys());
     _mobileClient->unregisterClient();
 }
@@ -123,10 +126,15 @@ TEST_F(MobileClientTest, shouldSucceedToCall)
         {one, state}
     };
 
+    std::string guestXpathState = "/mobile-network:core/subscribers[number='+380911111111']/state";
+    std::string changeState = "active";
+     std::string guestXpathIncomingNumber = "/mobile-network:core/subscribers[number='+380911111111']/incomingNumber";
     EXPECT_CALL(*_mock, fetchData(testMap))
             .WillOnce(DoAll(SetArgReferee<0>(testMapSecond), Return(true)));
-    EXPECT_CALL(*_mock, changeData(_, _))
-            .Times(4);
+    EXPECT_CALL(*_mock, changeData(guestXpathState, changeState));
+    EXPECT_CALL(*_mock, changeData(std::string(), std::string("+380911111111")));
+    EXPECT_CALL(*_mock, changeData(guestXpathIncomingNumber, std::string()));
+    EXPECT_CALL(*_mock, changeData(std::string(), changeState));
     _mobileClient->call("+380911111111");
     _mobileClient->handleModuleChange("active");
 }
@@ -141,8 +149,11 @@ TEST_F(MobileClientTest, shouldSucceedToAnswer)
 {
     _mobileClient->handleModuleChange("active");
     EXPECT_CALL(*_mock, fetchData(_));
-    EXPECT_CALL(*_mock, changeData(_, _))
-            .Times(2);
+
+    std::string state = "busy";
+    std::string XpathState = "/mobile-network:core/subscribers[number='']/state";
+    EXPECT_CALL(*_mock, changeData(XpathState, state));
+    EXPECT_CALL(*_mock, changeData(std::string(), state));
     _mobileClient->answer();
 }
 
