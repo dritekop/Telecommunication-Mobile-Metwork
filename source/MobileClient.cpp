@@ -80,6 +80,7 @@ namespace mobileclient {
         std::string deletePath = "/mobile-network:core/subscribers[number='" + _number + "']";
         _agent->changeData(deletePath);
         _agent->closeSys();
+        _name.erase();
         _number.erase();
         _xpathState.erase();
         _xpathIncomingNumber.erase();
