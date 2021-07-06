@@ -21,6 +21,24 @@ protected:
         _mobileClient = std::make_unique<mobileclient::MobileClient>(std::move(tempMock));
     }
 
+    void registerUser() {
+        EXPECT_CALL(*_mock, initSysrepo());
+        std::string one = "/mobile-network:core/subscribers[number='+380911111111']/state";
+        std::string two;
+        std::map<std::string, std::string> testMap = {
+            {one, two}
+        };
+
+        std::string moduleName = "mobile-network";
+        std::string value = "idle";
+        EXPECT_CALL(*_mock, fetchData(testMap));
+        EXPECT_CALL(*_mock, registerOperData(_, moduleName));
+        EXPECT_CALL(*_mock, changeData(one, value));
+        EXPECT_CALL(*_mock, subscribeForModelChanges(_, moduleName));
+
+        _mobileClient->registerClient("+380911111111");
+    }
+
     std::unique_ptr<mobileclient::MobileClient> _mobileClient;
     testing::StrictMock<NetConfAgentMock> *_mock;
 };
@@ -36,30 +54,15 @@ TEST_F(MobileClientTest, shouldSucceedToSetName)
     _mobileClient->setName("Edo");
 }
 
-TEST_F(MobileClientTest, shouldSucceedToRegister)
+TEST_F(MobileClientTest, shouldFailToRegisterDueToClient)
 {
-    EXPECT_CALL(*_mock, initSysrepo());
-    std::string one = "/mobile-network:core/subscribers[number='+380911111111']/state";
-    std::string two;
-    std::map<std::string, std::string> testMap = {
-        {one, two}
-    };
-
-    std::string moduleName = "mobile-network";
-    std::string value = "idle";
-    EXPECT_CALL(*_mock, fetchData(testMap));
-    EXPECT_CALL(*_mock, registerOperData(_, moduleName));
-    EXPECT_CALL(*_mock, changeData(one, value));
-    EXPECT_CALL(*_mock, subscribeForModelChanges(_, moduleName));
-
-    _mobileClient->registerClient("+380911111111");
-
+    registerUser();
     _mobileClient->registerClient("+380922222222");
     _mobileClient->call("+380911111111");
     _mobileClient->getXpathState();
 }
 
-TEST_F(MobileClientTest, shouldFailToRegister)
+TEST_F(MobileClientTest, shouldFailToRegisterDueToSysrepo)
 {
     EXPECT_CALL(*_mock, initSysrepo());
     std::string one = "/mobile-network:core/subscribers[number='+380911111111']/state";
@@ -119,6 +122,8 @@ TEST_F(MobileClientTest, shouldFailToCall)
 
 TEST_F(MobileClientTest, shouldSucceedToCall)
 {
+    registerUser();
+
     std::string one = "/mobile-network:core/subscribers[number='+380922222222']/state";
     std::string two;
     std::map<std::string, std::string> testMap = {
@@ -131,14 +136,16 @@ TEST_F(MobileClientTest, shouldSucceedToCall)
     };
 
     std::string guestXpathState = "/mobile-network:core/subscribers[number='+380922222222']/state";
+    std::string hostXpathState = "/mobile-network:core/subscribers[number='+380911111111']/state";
     std::string changeState = "active";
     std::string guestXpathIncomingNumber = "/mobile-network:core/subscribers[number='+380922222222']/incomingNumber";
+    std::string hostXpathIncomingNumber = "/mobile-network:core/subscribers[number='+380911111111']/incomingNumber";
     EXPECT_CALL(*_mock, fetchData(testMap))
             .WillOnce(DoAll(SetArgReferee<0>(testMapSecond), Return(true)));
     EXPECT_CALL(*_mock, changeData(guestXpathState, changeState));
-    EXPECT_CALL(*_mock, changeData(std::string(), changeState));
-    EXPECT_CALL(*_mock, changeData(guestXpathIncomingNumber, std::string()));
-    EXPECT_CALL(*_mock, changeData(std::string(), std::string("+380922222222")));
+    EXPECT_CALL(*_mock, changeData(hostXpathState, changeState));
+    EXPECT_CALL(*_mock, changeData(guestXpathIncomingNumber, std::string("+380911111111")));
+    EXPECT_CALL(*_mock, changeData(hostXpathIncomingNumber, std::string("+380922222222")));
     _mobileClient->call("+380922222222");
     _mobileClient->handleModuleChange("active");
 }
