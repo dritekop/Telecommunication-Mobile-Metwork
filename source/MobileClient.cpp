@@ -209,8 +209,13 @@ namespace mobileclient {
         }
         else if (!_callInitializer && change == "active") 
         {
+            std::string incomingNumber;
+            std::map<std::string, std::string> mapXpathValue = {
+                {_xpathIncomingNumber, incomingNumber}
+            };
+            _agent->fetchData(mapXpathValue);
             _state = active;
-            std::cout << "Incoming call. answer or reject?\n";
+            std::cout << "Incoming call from " + mapXpathValue[_xpathIncomingNumber] + ". answer or reject?\n";
         } 
         else if (change == "busy") 
         {

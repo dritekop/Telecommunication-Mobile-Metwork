@@ -39,6 +39,18 @@ protected:
         _mobileClient->registerClient("+380911111111");
     }
 
+    void callImitation() {
+        registerUser();
+        std::string hostXpathIncomingNumber = "/mobile-network:core/subscribers[number='+380911111111']/incomingNumber";
+        std::string incomingNumber = "+380922222222";
+        std::map<std::string, std::string> testMap = {
+            {hostXpathIncomingNumber, incomingNumber}
+        };
+        EXPECT_CALL(*_mock, fetchData(_))
+                .WillOnce(DoAll(SetArgReferee<0>(testMap), Return(true)));
+        _mobileClient->handleModuleChange("active");
+    }
+
     std::unique_ptr<mobileclient::MobileClient> _mobileClient;
     testing::StrictMock<NetConfAgentMock> *_mock;
 };
@@ -158,20 +170,24 @@ TEST_F(MobileClientTest, shouldFailToAnswer)
 
 TEST_F(MobileClientTest, shouldSucceedToAnswer)
 {
+    callImitation();
+
+    std::string hostXpathIncomingNumber = "/mobile-network:core/subscribers[number='+380911111111']/incomingNumber";
+    std::string incomingNumber = "+380922222222";
+    std::map<std::string, std::string> testMap = {
+        {hostXpathIncomingNumber, incomingNumber}
+    };
+    EXPECT_CALL(*_mock, fetchData(_))
+            .WillOnce(DoAll(SetArgReferee<0>(testMap), Return(true)));
     _mobileClient->handleModuleChange("active");
 
-    std::string one;
-    std::string incomingNumber = "+380911111111";
-    std::map<std::string, std::string> testMapSecond = {
-        {one, incomingNumber}
-    };
-
     std::string state = "busy";
-    std::string guestXpathState = "/mobile-network:core/subscribers[number='+380911111111']/state";
+    std::string hostXpathState = "/mobile-network:core/subscribers[number='+380911111111']/state";
+    std::string guestXpathState = "/mobile-network:core/subscribers[number='+380922222222']/state";
     EXPECT_CALL(*_mock, fetchData(_))
-            .WillOnce(DoAll(SetArgReferee<0>(testMapSecond), Return(true)));
+            .WillOnce(DoAll(SetArgReferee<0>(testMap), Return(true)));
     EXPECT_CALL(*_mock, changeData(guestXpathState, state));
-    EXPECT_CALL(*_mock, changeData(std::string(), state));
+    EXPECT_CALL(*_mock, changeData(hostXpathState, state));
     _mobileClient->answer();
 }
 
@@ -183,7 +199,7 @@ TEST_F(MobileClientTest, shouldFailToReject)
 
 TEST_F(MobileClientTest, shouldSucceedToReject)
 {
-    _mobileClient->handleModuleChange("active");
+    callImitation();    
     EXPECT_CALL(*_mock, fetchData(_));
     EXPECT_CALL(*_mock, changeData(_, _))
             .Times(4);
