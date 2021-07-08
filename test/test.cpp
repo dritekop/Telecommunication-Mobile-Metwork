@@ -230,13 +230,13 @@ TEST_F(MobileClientTest, shouldSucceedToHandleOperData)
 TEST_F(MobileClientTest, shouldSucceedToStopClient)
 {
     EXPECT_CALL(*_mock, closeSys());
-    _mobileClient->stopClient();
+    EXPECT_TRUE(_mobileClient->stopClient());
 }
 
 TEST_F(MobileClientTest, shouldFailToStopClient)
 {
     _mobileClient->handleModuleChange("busy");
-    _mobileClient->stopClient();
+    EXPECT_FALSE(_mobileClient->stopClient());
 }
 
 int main(int argc, char** argv) {
