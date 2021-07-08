@@ -177,9 +177,6 @@ TEST_F(MobileClientTest, shouldSucceedToAnswer)
     std::map<std::string, std::string> testMap = {
         {hostXpathIncomingNumber, incomingNumber}
     };
-    EXPECT_CALL(*_mock, fetchData(_))
-            .WillOnce(DoAll(SetArgReferee<0>(testMap), Return(true)));
-    _mobileClient->handleModuleChange("active");
 
     std::string state = "busy";
     std::string hostXpathState = "/mobile-network:core/subscribers[number='+380911111111']/state";
