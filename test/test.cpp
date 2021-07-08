@@ -36,7 +36,7 @@ protected:
         EXPECT_CALL(*_mock, changeData(one, value));
         EXPECT_CALL(*_mock, subscribeForModelChanges(_, moduleName));
 
-        _mobileClient->registerClient("+380911111111");
+        EXPECT_TRUE(_mobileClient->registerClient("+380911111111"));
     }
 
     void callImitation() {
@@ -90,7 +90,7 @@ TEST_F(MobileClientTest, shouldFailToRegisterDueToSysrepo)
 
     EXPECT_CALL(*_mock, fetchData(testMap))
             .WillOnce(DoAll(SetArgReferee<0>(testMapSecond), Return(true)));
-    _mobileClient->registerClient("+380911111111");
+    EXPECT_FALSE(_mobileClient->registerClient("+380911111111"));
 }
 
 TEST_F(MobileClientTest, shouldSucceedToUnregister)
@@ -98,7 +98,7 @@ TEST_F(MobileClientTest, shouldSucceedToUnregister)
     std::string one = "/mobile-network:core/subscribers[number='']";
     EXPECT_CALL(*_mock, changeData(one, std::string()));
     EXPECT_CALL(*_mock, closeSys());
-    _mobileClient->unregisterClient();
+    EXPECT_TRUE(_mobileClient->unregisterClient());
 }
 
 TEST_F(MobileClientTest, shouldFailToUnregister)
